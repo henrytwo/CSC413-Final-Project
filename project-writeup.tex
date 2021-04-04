@@ -1,0 +1,65 @@
+\documentclass[12pt]{article}
+\usepackage{listings}
+\usepackage{setspace}
+\usepackage{multicol}
+\usepackage{enumitem}
+\usepackage{amsmath,amsthm,amssymb}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{mathtools}
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\usepackage{graphicx}
+\usepackage{xcolor}
+
+\graphicspath{ {.} }
+
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{CSC413 Project}
+\lhead{Henry Tu and Seel Patel}
+\rfoot{Page \thepage}
+\lfoot{April 18, 2021}
+
+\lstdefinestyle{Python}{
+    language        = Python,
+    frame           = lines,
+    numbers         = left,
+    basicstyle      = \scriptsize,
+    keywordstyle    = \color{blue},
+    stringstyle     = \color{green},
+    commentstyle    = \color{red}\ttfamily
+}
+
+
+\makeatletter
+\renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
+  \hskip -\arraycolsep
+  \let\@ifnextchar\new@ifnextchar
+  \array{#1}}
+\makeatother
+\onehalfspacing
+
+% Some not sketchy latex
+\begin{document}
+\begin{center}
+    \textbf{Comparing the interpretability of different GAN architectures}
+\end{center}
+\begin{minipage}{.5\textwidth}
+            \centering
+            Henry Tu\\
+            University of Toronto
+\end{minipage}
+\begin{minipage}{.5\textwidth}
+            \centering
+            Seel Patel\\
+            University of Toronto
+\end{minipage}
+\\\\
+% Document starts here
+\textbf{Abstract}\\
+gans are very cool and we want to make them fight\\\\
+\textbf{Introduction}\\
+bsbsbsbsbsbs
+\end{document}
