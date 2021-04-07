@@ -26,6 +26,23 @@ class C2ST(torch.nn.Module):
 
         return torch.argmax(torch.softmax(out, dim=1), dim=1)
 
+    def backwards(self, epochs, data, labels, lr=0.01):
+        criterion = torch.nn.CrossEntropyLoss()
+        optimizer = torch.optim.Adam(self.parameters(), lr=lr)
+
+        for epoch in range(epochs):
+            self.train()
+
+            # TODO: Add batch loader?
+
+            loss = criterion(labels, self.forward(data))
+
+            if epoch % 10 == 0:
+                print('Epoch %i; Loss %f', epoch, loss)
+
+            # Optimize beep boop
+            loss.backwards()
+            optimizer.step()
 
 if __name__ == '__main__':
     wtf = torch.rand(100, 3, 100, 100).cuda()
