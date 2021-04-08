@@ -85,3 +85,5 @@ if __name__ == '__main__':
 
     with open("%d-%d-combined-training-dataset.pkl" % (num_datasets, len(training_input_data)), 'wb') as file:
         pickle.dump((training_input_data, training_output_data), file)
+
+    print("Output datasets written to disk")

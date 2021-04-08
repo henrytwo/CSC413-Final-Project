@@ -11,6 +11,9 @@ if __name__ == '__main__':
     with open(sys.argv[1], 'rb') as file:
         images = pickle.load(file)
 
+        if isinstance(images, tuple):
+            images = images[0]
+
         print(images.shape)
 
         #for i in images:
