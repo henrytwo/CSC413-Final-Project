@@ -3,28 +3,34 @@ import torch
 
 class C2ST(torch.nn.Module):
 
-    def __init__(self, W, H, kernel_size=5, stride=2):
+    def __init__(self, size, kernel_size=3, stride=2, padding=1):
         super().__init__()
 
-        self.conv = torch.nn.Sequential(
-            torch.nn.Conv2d(3, 20, kernel_size=kernel_size, stride=stride),
-            torch.nn.Conv2d(20, 50, kernel_size=kernel_size, stride=stride),
-            torch.nn.Conv2d(50, 100, kernel_size=kernel_size, stride=stride),
-        )
+        seq_layers = [
+            torch.nn.Conv2d(3, 16, kernel_size=kernel_size, stride=stride, padding=padding),
+            torch.nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride, padding=padding),
+            torch.nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride, padding=padding),
+            torch.nn.Conv2d(64, 128, kernel_size=kernel_size, stride=stride, padding=padding)
+        ]
+
+        self.conv = torch.nn.Sequential(*seq_layers)
+
+        filtered_image_size = size
+
+        for _ in range(len(seq_layers)):
+            filtered_image_size = int((filtered_image_size + 2 * padding - kernel_size) / stride + 1)
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(8100, 100),
+            torch.nn.Linear(128 * filtered_image_size ** 2, 100),
             torch.nn.Sigmoid(),
             torch.nn.Linear(100, 10),
             torch.nn.Sigmoid(),
-            torch.nn.Linear(10, 2)
+            torch.nn.Linear(10, 2),
+            torch.nn.Sigmoid()
         )
 
     def forward(self, x):
-        c = self.conv(x).reshape(x.shape[0], -1)
-        out = self.linear(c)
-
-        return torch.argmax(torch.softmax(out, dim=1), dim=1)
+        return self.linear(self.conv(x).reshape(x.shape[0], -1))
 
     def backwards(self, epochs, data, labels, lr=0.01):
         criterion = torch.nn.CrossEntropyLoss()
@@ -44,9 +50,10 @@ class C2ST(torch.nn.Module):
             loss.backwards()
             optimizer.step()
 
-if __name__ == '__main__':
-    wtf = torch.rand(100, 3, 100, 100).cuda()
 
-    c2st = C2ST(10, 10).cuda()
+if __name__ == '__main__':
+    wtf = torch.rand(10, 3, 100, 100).cuda()
+
+    c2st = C2ST(100).cuda()
 
     print(c2st(wtf))
