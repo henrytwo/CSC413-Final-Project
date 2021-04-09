@@ -1,3 +1,14 @@
+"""
+CSC413 Final Project, W2021
+University of Toronto
+
+By Henry Tu & Seel Patel
+
+#################################
+
+C2ST Analysis
+"""
+
 import torch
 import sys
 import pickle

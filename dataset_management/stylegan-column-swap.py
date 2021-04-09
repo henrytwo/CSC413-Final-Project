@@ -1,3 +1,14 @@
+"""
+CSC413 Final Project, W2021
+University of Toronto
+
+By Henry Tu & Seel Patel
+
+#################################
+
+Transforms matrices in the format (B, H, W, D) -> (B, D, H, W)
+"""
+
 import pickle
 import sys
 import numpy as np

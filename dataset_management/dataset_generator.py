@@ -1,5 +1,13 @@
 """
-Takes in n pickled datasets and aggregates + randomizes them into a new set
+CSC413 Final Project, W2021
+University of Toronto
+
+By Henry Tu & Seel Patel
+
+#################################
+
+Takes in n pickled datasets as parameters and aggregates + randomizes them into a new set.
+The "class ID" of the output corresponds to the index of the argument where the image originated from.
 """
 
 import sys
