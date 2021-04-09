@@ -16,5 +16,10 @@ if __name__ == '__main__':
 
         print(images.shape)
 
-        #for i in images:
+        if images.shape[1] == 3:
+            images = np.swapaxes(images, 2, 3)
+            images = np.swapaxes(images, 1, 3)
+
+        print(images.shape)
+
         PIL.Image.fromarray(images[0], 'RGB').show()

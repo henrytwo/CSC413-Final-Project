@@ -1,6 +1,7 @@
 import pickle
 import sys
 import numpy as np
+import os
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
@@ -10,8 +11,10 @@ if __name__ == '__main__':
     with open(sys.argv[1], 'rb') as file:
         images = pickle.load(file)
 
-        np.swapaxes(images, 1, 3)
-        np.swapaxes(images, 1, 2)
+        images = np.swapaxes(images, 1, 3)
+        images = np.swapaxes(images, 2, 3)
 
-        with open('swapped-' + sys.argv[1], 'wb') as file_out:
+        file_name, extension = os.path.splitext(sys.argv[1])
+
+        with open(file_name + '-swapped' + extension, 'wb') as file_out:
             pickle.dump(images, file_out)

@@ -1,4 +1,6 @@
 import torch
+import sys
+import pickle
 
 
 class C2ST(torch.nn.Module):
@@ -30,30 +32,62 @@ class C2ST(torch.nn.Module):
         )
 
     def forward(self, x):
+        # Output of 0 -> Image is fake
+        # Output of 1- > Image is real
+
         return self.linear(self.conv(x).reshape(x.shape[0], -1))
 
-    def backwards(self, epochs, data, labels, lr=0.01):
-        criterion = torch.nn.CrossEntropyLoss()
-        optimizer = torch.optim.Adam(self.parameters(), lr=lr)
 
-        for epoch in range(epochs):
-            self.train()
+def train(model, epochs, data, labels, lr=0.01):
+    criterion = torch.nn.CrossEntropyLoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-            # TODO: Add batch loader?
+    for epoch in range(epochs):
+        model.train()
 
-            loss = criterion(labels, self.forward(data))
+        # TODO: Add batch loader?
 
-            if epoch % 10 == 0:
-                print('Epoch %i; Loss %f', epoch, loss)
+        loss = criterion(labels, model.forward(data))
 
-            # Optimize beep boop
-            loss.backwards()
-            optimizer.step()
+        if epoch % 10 == 0:
+            print('Epoch %i; Loss %f', epoch, loss)
+
+        # Optimize beep boop
+        loss.backwards()
+        optimizer.step()
 
 
 if __name__ == '__main__':
-    wtf = torch.rand(10, 3, 100, 100).cuda()
 
-    c2st = C2ST(100).cuda()
+    SAVE = True
+    USE_EXISTING = False
+    TRAIN = True
 
-    print(c2st(wtf))
+    if len(sys.argv) != 2:
+        print('Usage: python3 %s <path to training dataset pickle file>' % sys.argv[0])
+        exit(1)
+
+    with open(sys.argv[1], 'rb') as file:
+        print("Loading dataset")
+        train_input, train_output = [torch.Tensor(x) for x in pickle.load(file)]
+        print("Dataset loaded")
+
+    if USE_EXISTING:
+        print("Loading model from disk")
+        with open("model.pkl", "rb") as file:
+            model = pickle.load(file)
+    else:
+        print("Generating new model")
+        model = C2ST(train_input.shape[3]) #.cuda()
+
+    if TRAIN:
+        print("Training!")
+        train(model=model, epochs=1000, data=train_input, labels=train_output)
+        print("Done training")
+
+    print("Done training")
+
+    if SAVE:
+        print("Writing model to desk")
+        with open("model.pkl", "wb") as file:
+            pickle.dump(model, file)
