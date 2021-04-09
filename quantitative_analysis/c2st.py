@@ -1,7 +1,7 @@
 import torch
 import sys
 import pickle
-
+from tqdm import tqdm
 
 class C2ST(torch.nn.Module):
 
@@ -27,7 +27,7 @@ class C2ST(torch.nn.Module):
             torch.nn.Sigmoid(),
             torch.nn.Linear(100, 10),
             torch.nn.Sigmoid(),
-            torch.nn.Linear(10, 2),
+            torch.nn.Linear(10, 1),
             torch.nn.Sigmoid()
         )
 
@@ -42,18 +42,20 @@ def train(model, epochs, data, labels, lr=0.01):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    for epoch in range(epochs):
+    for epoch in tqdm(range(epochs)):
         model.train()
 
         # TODO: Add batch loader?
 
-        loss = criterion(labels, model.forward(data))
+        predictions = model.forward(data)
+
+        loss = criterion(predictions, labels)
 
         if epoch % 10 == 0:
-            print('Epoch %i; Loss %f', epoch, loss)
+            print('Epoch %i; Loss %f' % (epoch, loss))
 
         # Optimize beep boop
-        loss.backwards()
+        loss.backward()
         optimizer.step()
 
 
@@ -69,7 +71,11 @@ if __name__ == '__main__':
 
     with open(sys.argv[1], 'rb') as file:
         print("Loading dataset")
-        train_input, train_output = [torch.Tensor(x) for x in pickle.load(file)]
+        data = pickle.load(file)
+
+        train_input = torch.tensor(data[0], requires_grad=False).float()
+        train_output = torch.tensor(data[1] == 2, requires_grad=False).long()
+
         print("Dataset loaded")
 
     if USE_EXISTING:
