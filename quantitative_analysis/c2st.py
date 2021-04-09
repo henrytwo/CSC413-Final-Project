@@ -3,6 +3,7 @@ import sys
 import pickle
 from tqdm import tqdm
 
+
 class C2ST(torch.nn.Module):
 
     def __init__(self, size, kernel_size=3, stride=2, padding=1):
@@ -38,32 +39,46 @@ class C2ST(torch.nn.Module):
         return self.linear(self.conv(x).reshape(x.shape[0], -1))
 
 
-def train(model, epochs, data, labels, lr=0.01):
+def train(model, epochs, data, labels, batch_size=10, lr=0.01):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     for epoch in tqdm(range(epochs)):
         model.train()
 
-        # TODO: Add batch loader?
+        N = data.shape[0]
+        current_index = 0
 
-        predictions = model.forward(data)
+        for iteration in range(N // batch_size):
+            local_batch_size = batch_size
 
-        loss = criterion(predictions, labels)
+            if iteration < N % batch_size:
+                local_batch_size += 1
 
-        if epoch % 10 == 0:
-            print('Epoch %i; Loss %f' % (epoch, loss))
+            batch_data = data[current_index: current_index + local_batch_size]
+            batch_labels = labels[current_index: current_index + local_batch_size]
 
-        # Optimize beep boop
-        loss.backward()
-        optimizer.step()
+            predictions = model.forward(batch_data)
+            loss = criterion(predictions, batch_labels)
+
+            if iteration == 0 and epoch % 10 == 0:
+                print('Epoch %i; Loss %f' % (epoch, loss))
+
+            # Optimize beep boop
+            loss.backward()
+            optimizer.step()
+
+            current_index += local_batch_size
 
 
 if __name__ == '__main__':
 
+    CUDA = True
     SAVE = True
     USE_EXISTING = False
     TRAIN = True
+
+    device = torch.device("cuda" if CUDA and torch.cuda.is_available() else "cpu")
 
     if len(sys.argv) != 2:
         print('Usage: python3 %s <path to training dataset pickle file>' % sys.argv[0])
@@ -73,8 +88,11 @@ if __name__ == '__main__':
         print("Loading dataset")
         data = pickle.load(file)
 
-        train_input = torch.tensor(data[0], requires_grad=False).float()
-        train_output = torch.tensor(data[1] == 2, requires_grad=False).long()
+        # Classification ID of 2 -> Real image
+        # Classification ID of 1 -> DCGAN
+        # Classification ID of 0 -> StyleGAN
+        train_input = torch.tensor(data[0], requires_grad=False, device=device).float()
+        train_output = torch.tensor(data[1] == 2, requires_grad=False, device=device).long()
 
         print("Dataset loaded")
 
@@ -84,7 +102,7 @@ if __name__ == '__main__':
             model = pickle.load(file)
     else:
         print("Generating new model")
-        model = C2ST(train_input.shape[3]) #.cuda()
+        model = C2ST(train_input.shape[3]).to(device)
 
     if TRAIN:
         print("Training!")
