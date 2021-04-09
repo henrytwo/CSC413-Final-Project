@@ -28,7 +28,7 @@ class C2ST(torch.nn.Module):
             torch.nn.Sigmoid(),
             torch.nn.Linear(100, 10),
             torch.nn.Sigmoid(),
-            torch.nn.Linear(10, 1),
+            torch.nn.Linear(10, 2),
             torch.nn.Sigmoid()
         )
 
@@ -51,6 +51,7 @@ def train(model, epochs, data, labels, batch_size=10, lr=0.01):
 
         for iteration in range(N // batch_size):
             local_batch_size = batch_size
+            optimizer.zero_grad()
 
             if iteration < N % batch_size:
                 local_batch_size += 1
@@ -63,6 +64,8 @@ def train(model, epochs, data, labels, batch_size=10, lr=0.01):
 
             if iteration == 0 and epoch % 10 == 0:
                 print('Epoch %i; Loss %f' % (epoch, loss))
+
+                print(predictions, batch_labels)
 
             # Optimize beep boop
             loss.backward()
