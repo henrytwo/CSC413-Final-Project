@@ -6,11 +6,11 @@ By Henry Tu & Seel Patel
 
 #################################
 
-Peak signal-to-noise ratio Analysis
+Structural similarity Analysis
 """
 
 import sys
-from skimage.metrics import structural_similarity as ssim
+from skimage.metrics import peak_signal_noise_ratio as psnr
 import pickle
 import random
 from tqdm import tqdm
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         print('Usage: python3 %s <path to real> <path to GAN>' % sys.argv[0])
         exit(1)
 
-    total_ssim = 0
+    total_psnr = 0
 
     with open(sys.argv[1], "rb") as real_file:
         real_dataset = pickle.load(real_file)
@@ -33,18 +33,18 @@ if __name__ == '__main__':
 
         real_image = real_dataset[random.randint(0, len(real_dataset) - 1)]
 
-        ssim_score = ssim(real_image, img, win_size=3, multichannel=True, data_range=img.max() - img.min())
+        psnr_score = psnr(real_image, img, data_range=img.max() - img.min())
 
         if i % 100 == 0:
-            print('SSIM: %f; Running Average: %f' % (ssim_score, total_ssim / (i + 1)))
+            print('PSNR: %f; Running Average: %f' % (psnr_score, total_psnr / (i + 1)))
 
-        total_ssim += ssim_score
+        total_psnr += psnr_score
 
-    avg_ssim = total_ssim / len(gan_dataset)
+    avg_psnr = total_psnr / len(gan_dataset)
 
-    print("Average SSIM: %f" % avg_ssim)
+    print("Average PSNR: %f" % avg_psnr)
 
-    with open("ssim_result.txt", "w") as output_file:
+    with open("psnr_result.txt", "w") as output_file:
         output_file.write("Real dataset path: %s\n" % sys.argv[1])
         output_file.write("GAN dataset path: %s\n" % sys.argv[2])
-        output_file.write("Average SSIM: %f\n" % avg_ssim)
+        output_file.write("Average PSNR: %f\n" % avg_psnr)
