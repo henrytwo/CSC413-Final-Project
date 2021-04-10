@@ -47,6 +47,7 @@ if __name__ == '__main__':
 
     input_data = None
     output_data = np.array([])
+    num_images_total = 0
 
     # Unpickle the data sets and shove them into the arrays
     for i in range(num_datasets):
@@ -55,6 +56,7 @@ if __name__ == '__main__':
         images = np.load(path)
 
         num_images = images.shape[0]
+        num_images_total += num_images
 
         # Add input data to array
         if isinstance(input_data, type(None)):
@@ -81,8 +83,8 @@ if __name__ == '__main__':
 
     # [Test] [Validation] [Training]
 
-    test_partition = int(PERC_TEST * num_images)
-    validation_partition = int((PERC_TEST + PERC_VALID) * num_images)
+    test_partition = int(PERC_TEST * num_images_total)
+    validation_partition = int((PERC_TEST + PERC_VALID) * num_images_total)
 
     test_input_data, validation_input_data, training_input_data = np.split(input_data,
                                                                            [test_partition, validation_partition])
