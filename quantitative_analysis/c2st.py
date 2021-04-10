@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 class C2ST(torch.nn.Module):
 
-    def __init__(self, size, kernel_size=5, stride=2, padding=1):
+    def __init__(self, size, kernel_size=3, stride=2, padding=1):
         super().__init__()
 
         seq_layers = [
@@ -36,12 +36,12 @@ class C2ST(torch.nn.Module):
             filtered_image_size = int((filtered_image_size + 2 * padding - kernel_size) / stride + 1)
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(128 * filtered_image_size ** 2, 100),
+            torch.nn.Linear(128 * filtered_image_size ** 2, 2),
             torch.nn.Sigmoid(),
-            torch.nn.Linear(100, 10),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(10, 2),
-            torch.nn.Sigmoid()
+            #torch.nn.Linear(100, 10),
+            #torch.nn.Sigmoid(),
+            #torch.nn.Linear(10, 2),
+            #torch.nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -64,10 +64,9 @@ def run_validation(model, validation_dataloader):
 
         accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
-    avg_loss = loss / len(validation_dataloader)
     avg_accuracy = 100 * (accuracy / len(validation_dataloader.dataset))
 
-    print("Validation Loss: %f, Validation Accuracy: %f%%" % (avg_loss, avg_accuracy))
+    print("Validation Loss: %f, Validation Accuracy: %f%%" % (loss, avg_accuracy))
 
 
 def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
@@ -94,7 +93,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
             optimizer.step()
 
         if epoch % 10 == 0:
-            print('Epoch %i; Training Loss %f; Average Training Accuracy: %f%%' % (epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
+            print('Epoch %i; Training Loss %f; Training Accuracy: %f%%' % (epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
 
             # Print validation loss
             run_validation(model, validation_dataloader)
