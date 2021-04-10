@@ -94,7 +94,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
 
         if epoch % 10 == 0:
             print('Epoch %i; Training Loss %f; Training Accuracy: %f%%' % (
-            epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
+                epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
 
             # Print validation loss
             run_validation(model, validation_dataloader)
@@ -153,17 +153,17 @@ if __name__ == '__main__':
 
         print("Validation dataset loaded")
 
+    model = C2ST(data.get_shape()).to(device)
+
     if USE_EXISTING:
         print("Loading model from disk")
-        with open("model.pkl", "rb") as file:
-            model = pickle.load(file)
+        model.load_state_dict(torch.load("model.torch"))
     else:
         print("Generating new model")
-        model = C2ST(data.get_shape()).to(device)
 
     if TRAIN:
         print("Training!")
-        train(model=model, epochs=1000, training_dataloader=training_dataloader,
+        train(model=model, epochs=3, training_dataloader=training_dataloader,
               validation_dataloader=validation_dataloader)
         print("Done training")
 
@@ -171,5 +171,4 @@ if __name__ == '__main__':
 
     if SAVE:
         print("Writing model to desk")
-        with open("model.pkl", "wb") as file:
-            pickle.dump(model, file)
+        torch.save(model.state_dict(), "model.torch")

@@ -9,10 +9,11 @@ By Henry Tu & Seel Patel
 Structural similarity Analysis
 """
 
-import sys
-from skimage.metrics import peak_signal_noise_ratio as psnr
-import pickle
 import random
+import sys
+
+import numpy as np
+from skimage.metrics import peak_signal_noise_ratio as psnr
 from tqdm import tqdm
 
 if __name__ == '__main__':
@@ -22,11 +23,8 @@ if __name__ == '__main__':
 
     total_psnr = 0
 
-    with open(sys.argv[1], "rb") as real_file:
-        real_dataset = pickle.load(real_file)
-
-    with open(sys.argv[2], "rb") as gan_file:
-        gan_dataset = pickle.load(gan_file)
+    real_dataset = np.load(sys.argv[1])
+    gan_dataset = np.load(sys.argv[2])
 
     for i in tqdm(range(len(gan_dataset))):
         img = gan_dataset[i]
