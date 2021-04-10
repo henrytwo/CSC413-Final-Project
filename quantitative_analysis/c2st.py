@@ -102,11 +102,11 @@ if __name__ == '__main__':
         print("Loading dataset")
         data = pickle.load(file)
 
-        # Classification ID of 2 -> Real image
-        # Classification ID of 1 -> DCGAN
-        # Classification ID of 0 -> StyleGAN
+        # Classification ID of 2 -> DCGAN
+        # Classification ID of 1 -> Stylegan
+        # Classification ID of 0 -> Real
         train_input = torch.tensor(data[0], requires_grad=False, device=device).float()
-        train_output = torch.tensor(data[1] == 2, requires_grad=False, device=device).long()
+        train_output = torch.tensor(data[1] == 0, requires_grad=False, device=device).long()
 
         print("Dataset loaded")
 

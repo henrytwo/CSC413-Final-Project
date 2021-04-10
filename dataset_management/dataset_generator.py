@@ -33,9 +33,13 @@ def parallel_shuffle(data, target):
 
 
 if __name__ == '__main__':
+    """
+    Order should be:
+    Real Images, StyleGAN, DCGAN
+    """
     if len(sys.argv) < 2:
         print(
-            'Usage: python3 %s <paths to pickle file>\nThe classifier index will be to the dataset\'s parameter index' %
+            'Usage: python3 %s <paths to npy file>\nThe classifier index will be to the dataset\'s parameter index' %
             sys.argv[0])
         exit(1)
 
@@ -48,24 +52,24 @@ if __name__ == '__main__':
     for i in range(num_datasets):
         path = sys.argv[i + 1]
 
-        with open(sys.argv[1], 'rb') as file:
-            images = pickle.load(file)
-            num_images = images.shape[0]
+        images = np.load(path)
 
-            # Add input data to array
-            if isinstance(input_data, type(None)):
-                input_data = images
-            else:
-                input_data = np.concatenate([images, input_data], axis=0)
+        num_images = images.shape[0]
 
-            # Add expected output (i.e. the dataset class)
-            output_data = np.concatenate(
-                [
-                    output_data,
-                    np.full((num_images), i)
-                ],
-                axis=0
-            )
+        # Add input data to array
+        if isinstance(input_data, type(None)):
+            input_data = images
+        else:
+            input_data = np.concatenate([images, input_data], axis=0)
+
+        # Add expected output (i.e. the dataset class)
+        output_data = np.concatenate(
+            [
+                output_data,
+                np.full((num_images), i)
+            ],
+            axis=0
+        )
 
     print(output_data.shape, input_data.shape)
 
