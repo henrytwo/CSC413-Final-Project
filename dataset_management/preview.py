@@ -16,21 +16,21 @@ import numpy as np
 
 if __name__ == '__main__':
     if len(sys.argv) != 2:
-        print('Usage: python3 %s <path to pickle file>' % sys.argv[0])
+        print('Usage: python3 %s <path to npz file>' % sys.argv[0])
         exit(1)
 
-    with open(sys.argv[1], 'rb') as file:
-        images = pickle.load(file)
+    images = np.load(sys.argv[1])
+    print(images)
 
-        if isinstance(images, tuple):
-            images = images[0]
+    if isinstance(images, tuple):
+        images = images[0]
 
-        print(images.shape)
+    print(images.shape)
 
-        if images.shape[1] == 3:
-            images = np.swapaxes(images, 2, 3)
-            images = np.swapaxes(images, 1, 3)
+    if images.shape[1] == 3:
+        images = np.swapaxes(images, 2, 3)
+        images = np.swapaxes(images, 1, 3)
 
-        print(images.shape)
+    print(images.shape)
 
-        PIL.Image.fromarray(images[0], 'RGB').show()
+    PIL.Image.fromarray(images[0], 'RGB').show()
