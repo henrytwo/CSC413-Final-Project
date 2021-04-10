@@ -9,9 +9,10 @@ By Henry Tu & Seel Patel
 C2ST Analysis
 """
 
-import torch
-import sys
 import pickle
+import sys
+
+import torch
 from tqdm import tqdm
 
 
@@ -50,25 +51,17 @@ class C2ST(torch.nn.Module):
         return self.linear(self.conv(x).reshape(x.shape[0], -1))
 
 
-def train(model, epochs, data, labels, batch_size=10, lr=0.01):
+def train(model, epochs, dataloader, lr=0.01):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     for epoch in tqdm(range(epochs)):
         model.train()
 
-        N = data.shape[0]
-        current_index = 0
+        iteration = 0
 
-        for iteration in range(N // batch_size):
-            local_batch_size = batch_size
+        for batch_data, batch_labels in dataloader:
             optimizer.zero_grad()
-
-            if iteration < N % batch_size:
-                local_batch_size += 1
-
-            batch_data = data[current_index: current_index + local_batch_size]
-            batch_labels = labels[current_index: current_index + local_batch_size]
 
             predictions = model.forward(batch_data)
             loss = criterion(predictions, batch_labels)
@@ -82,7 +75,24 @@ def train(model, epochs, data, labels, batch_size=10, lr=0.01):
             loss.backward()
             optimizer.step()
 
-            current_index += local_batch_size
+            iteration += 1
+
+
+class ImageDataset(torch.utils.data.Dataset):
+    def __init__(self, data, device):
+        super(ImageDataset, self).__init__()
+        self.input_data = data[0]
+        self.output_data = data[1]
+        self.device = device
+
+    def __len__(self):
+        return self.input_data.shape[0]
+
+    def get_shape(self):
+        return self.input_data.shape[3]
+
+    def __getitem__(self, index):
+        return torch.tensor(self.input_data[index], requires_grad=False, device=device).float(), torch.tensor(self.output_data[index], requires_grad=False, device=device).long()
 
 
 if __name__ == '__main__':
@@ -100,13 +110,18 @@ if __name__ == '__main__':
 
     with open(sys.argv[1], 'rb') as file:
         print("Loading dataset")
-        data = pickle.load(file)
+        data = ImageDataset(pickle.load(file), device)
+        print("Wow it's loaded!")
+
+        dataloader = torch.utils.data.DataLoader(data, batch_size=10)
+
+        print(dataloader)
 
         # Classification ID of 2 -> DCGAN
         # Classification ID of 1 -> Stylegan
         # Classification ID of 0 -> Real
-        train_input = torch.tensor(data[0], requires_grad=False, device=device).float()
-        train_output = torch.tensor(data[1] == 0, requires_grad=False, device=device).long()
+        # train_input = torch.tensor(data[0], requires_grad=False, device=device).float()
+        # train_output = torch.tensor(data[1] == 0, requires_grad=False, device=device).long()
 
         print("Dataset loaded")
 
@@ -116,11 +131,11 @@ if __name__ == '__main__':
             model = pickle.load(file)
     else:
         print("Generating new model")
-        model = C2ST(train_input.shape[3]).to(device)
+        model = C2ST(data.get_shape()).to(device)
 
     if TRAIN:
         print("Training!")
-        train(model=model, epochs=1000, data=train_input, labels=train_output)
+        train(model=model, epochs=1000, dataloader=dataloader)
         print("Done training")
 
     print("Done training")
