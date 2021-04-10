@@ -38,10 +38,10 @@ class C2ST(torch.nn.Module):
         self.linear = torch.nn.Sequential(
             torch.nn.Linear(128 * filtered_image_size ** 2, 2),
             torch.nn.Sigmoid(),
-            #torch.nn.Linear(100, 10),
-            #torch.nn.Sigmoid(),
-            #torch.nn.Linear(10, 2),
-            #torch.nn.Sigmoid()
+            # torch.nn.Linear(100, 10),
+            # torch.nn.Sigmoid(),
+            # torch.nn.Linear(10, 2),
+            # torch.nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -73,7 +73,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    #run_validation(model, validation_dataloader)
+    # run_validation(model, validation_dataloader)
 
     for epoch in tqdm(range(epochs)):
         model.train()
@@ -93,7 +93,8 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
             optimizer.step()
 
         if epoch % 10 == 0:
-            print('Epoch %i; Training Loss %f; Training Accuracy: %f%%' % (epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
+            print('Epoch %i; Training Loss %f; Training Accuracy: %f%%' % (
+            epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
 
             # Print validation loss
             run_validation(model, validation_dataloader)
