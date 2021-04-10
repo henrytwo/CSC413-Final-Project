@@ -164,7 +164,7 @@ if __name__ == '__main__':
     if TRAIN:
         print("Training!")
         train(model=model, epochs=1000, training_dataloader=training_dataloader,
-              validation_dataloader=training_dataloader)
+              validation_dataloader=validation_dataloader)
         print("Done training")
 
     print("Done training")
