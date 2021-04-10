@@ -9,9 +9,9 @@ By Henry Tu & Seel Patel
 Previews the first image from a dataset
 """
 
-import pickle
 import sys
-import PIL.Image
+
+import matplotlib.pyplot as plt
 import numpy as np
 
 if __name__ == '__main__':
@@ -33,4 +33,5 @@ if __name__ == '__main__':
 
     print(images.shape)
 
-    PIL.Image.fromarray(images[0], 'RGB').show()
+    plt.imshow(images[0])
+    plt.show()
