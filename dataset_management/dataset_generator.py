@@ -18,7 +18,10 @@ import numpy as np
 # 20% of total is set aside for validation
 # Remainder is used for testing
 PERC_TEST = 0.1
-PERC_VALID = 0.2
+PERC_VALID = 0.1
+
+# Maximum number of elements between all of the data sets
+TOTAL_MAX = 10000
 
 
 def parallel_shuffle(data, target):
@@ -73,10 +76,14 @@ if __name__ == '__main__':
             axis=0
         )
 
-    print(output_data.shape, input_data.shape)
-
     # Shuffle the data
     parallel_shuffle(input_data, output_data)
+
+    # Truncate data
+    input_data = input_data[:TOTAL_MAX]
+    output_data = output_data[:TOTAL_MAX]
+
+    print(output_data.shape, input_data.shape)
 
     # Divide into train, validation, and test sets
     num_cases = output_data.shape[0]
