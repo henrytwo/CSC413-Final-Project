@@ -135,9 +135,9 @@ class ImageDataset(torch.utils.data.Dataset):
 
 
 def do_train():
-    if len(sys.argv) != 5:
+    if len(sys.argv) != 4:
         print(
-            'Usage: python3 %s train <path to training dataset> <path to validation dataset> <path to test dataset>' %
+            'Usage: python3 %s train <path to training dataset> <path to validation dataset>' %
             sys.argv[0])
         exit(1)
 
@@ -163,14 +163,6 @@ def do_train():
 
         print("Validation dataset loaded")
 
-    # Load test dataset
-    with open(sys.argv[4], 'rb') as file:
-        print("Loading test dataset")
-        data = ImageDataset(pickle.load(file), device)
-        test_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
-
-        print("Test dataset loaded")
-
     model = C2ST(data.get_shape()).to(device)
 
     if USE_EXISTING:
@@ -185,7 +177,6 @@ def do_train():
     print("Done training")
 
     # TODO: Plot loss curves
-    evaluate_model(model, test_dataloader, 'Test')
 
     if SAVE:
         print("Writing model to disk")
@@ -193,22 +184,19 @@ def do_train():
 
 
 def do_evaluate():
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 3:
         print(
-            'Usage: python3 %s evaluate <path to evaluation dataset> <true classification (1 - fake; 0 - real)>' %
+            'Usage: python3 %s evaluate <path to evaluation dataset>' %
             sys.argv[0])
         exit(1)
 
     print("Loading test dataset")
 
     # Applies a label of 1 to each case
-    file_data = np.load(sys.argv[2])
-    labelled_dataset = file_data, np.full(file_data.shape[0], int(sys.argv[3]))
-
-    print(labelled_dataset[0].shape, labelled_dataset[1].shape)
-
-    data = ImageDataset(labelled_dataset, device)
-    evaluation_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
+    with open(sys.argv[2], 'rb') as file:
+        print("Loading evaluation dataset")
+        data = ImageDataset(pickle.load(file), device)
+        evaluation_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
 
     print("Evaluation dataset loaded")
 

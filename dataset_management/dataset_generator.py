@@ -106,7 +106,7 @@ if __name__ == '__main__':
     with open("validation-%d-%d-combined-dataset.pkl" % (num_datasets, len(validation_input_data)), 'wb') as file:
         pickle.dump((validation_input_data, validation_output_data), file)
 
-    with open("validation-%d-%d-combined-dataset.pkl" % (num_datasets, len(training_input_data)), 'wb') as file:
+    with open("training-%d-%d-combined-dataset.pkl" % (num_datasets, len(training_input_data)), 'wb') as file:
         pickle.dump((training_input_data, training_output_data), file)
 
     print("Output datasets written to disk")
