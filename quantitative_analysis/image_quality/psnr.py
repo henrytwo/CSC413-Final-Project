@@ -6,7 +6,7 @@ By Henry Tu & Seel Patel
 
 #################################
 
-Structural similarity Analysis
+Peak signal-to-noise ratio Analysis
 """
 
 import random

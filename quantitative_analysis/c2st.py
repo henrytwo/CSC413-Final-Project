@@ -82,7 +82,7 @@ def run_validation(model, validation_dataloader):
     print("Validation Loss: %f, Validation Accuracy: %f%%" % (loss, avg_accuracy))
 
 
-def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
+def train(model, epochs, training_dataloader, validation_dataloader, lr=0.2):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 

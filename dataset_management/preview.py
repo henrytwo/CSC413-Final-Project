@@ -20,7 +20,7 @@ if __name__ == '__main__':
         exit(1)
 
     images = np.load(sys.argv[1])
-    print(images)
+    #print(images)
 
     if isinstance(images, tuple):
         images = images[0]
@@ -31,7 +31,14 @@ if __name__ == '__main__':
         images = np.swapaxes(images, 2, 3)
         images = np.swapaxes(images, 1, 3)
 
-    print(images.shape)
+    #print(images.shape)
 
-    plt.imshow(images[0])
+    img_subset = np.concatenate(images[:10], axis=1)
+    scale = 4
+
+    print(img_subset.shape)
+
+    print(img_subset)
+
+    plt.imshow(img_subset)
     plt.show()
