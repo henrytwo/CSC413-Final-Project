@@ -1,0 +1,3 @@
+Real dataset path: ../dataset_management/raw-dataset/images_0-swapped.npy
+GAN dataset path: ../dataset_management/coco-dataset/coco_images-normalized-swapped.npy
+Average SSIM: 0.271226

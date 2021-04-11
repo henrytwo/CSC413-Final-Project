@@ -64,29 +64,29 @@ class C2ST(torch.nn.Module):
         return self.linear(self.conv(x).reshape(x.shape[0], -1))
 
 
-def run_validation(model, validation_dataloader):
+def evaluate_model(model, dataloader, name):
     model.eval()
 
     criterion = torch.nn.CrossEntropyLoss()
     accuracy = 0
     loss = 0
 
-    for batch_data, batch_labels in validation_dataloader:
+    for batch_data, batch_labels in dataloader:
         predictions = model.forward(batch_data)
         loss = criterion(predictions, batch_labels)
 
         accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
-    avg_accuracy = 100 * (accuracy / len(validation_dataloader.dataset))
+    avg_accuracy = 100 * (accuracy / len(dataloader.dataset))
 
-    print("Validation Loss: %f, Validation Accuracy: %f%%" % (loss, avg_accuracy))
+    print("%s Loss: %f, %s Accuracy: %f%%" % (name, loss, name, avg_accuracy))
 
 
-def train(model, epochs, training_dataloader, validation_dataloader, lr=0.2):
+def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    run_validation(model, validation_dataloader)
+    evaluate_model(model, validation_dataloader, 'Validation')
 
     for epoch in tqdm(range(epochs)):
         model.train()
@@ -110,7 +110,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.2):
                 epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
 
             # Print validation loss
-            run_validation(model, validation_dataloader)
+            evaluate_model(model, validation_dataloader, 'Validation')
 
 
 class ImageDataset(torch.utils.data.Dataset):
@@ -135,13 +135,13 @@ if __name__ == '__main__':
 
     CUDA = True
     SAVE = True
-    USE_EXISTING = False
-    TRAIN = True
+    USE_EXISTING = True
+    TRAIN = False
 
     device = torch.device("cuda" if CUDA and torch.cuda.is_available() else "cpu")
 
-    if len(sys.argv) != 3:
-        print('Usage: python3 %s <path to training dataset> <path to validation dataset>' % sys.argv[0])
+    if len(sys.argv) != 4:
+        print('Usage: python3 %s <path to training dataset> <path to validation dataset> <path to test dataset>' % sys.argv[0])
         exit(1)
 
     # Load training dataset
@@ -166,6 +166,14 @@ if __name__ == '__main__':
 
         print("Validation dataset loaded")
 
+    # Load test dataset
+    with open(sys.argv[3], 'rb') as file:
+        print("Loading test dataset")
+        data = ImageDataset(pickle.load(file), device)
+        test_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
+
+        print("Test dataset loaded")
+
     model = C2ST(data.get_shape()).to(device)
 
     if USE_EXISTING:
@@ -182,8 +190,8 @@ if __name__ == '__main__':
 
     print("Done training")
 
-    # TODO: evaluate against test dataset
     # TODO: Plot loss curves
+    evaluate_model(model, test_dataloader, 'Test')
 
     if SAVE:
         print("Writing model to disk")

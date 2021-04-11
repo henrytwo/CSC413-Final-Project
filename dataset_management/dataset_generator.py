@@ -90,6 +90,8 @@ if __name__ == '__main__':
 
     # [Test] [Validation] [Training]
 
+    num_images_total = min(num_images_total, TOTAL_MAX)
+
     test_partition = int(PERC_TEST * num_images_total)
     validation_partition = int((PERC_TEST + PERC_VALID) * num_images_total)
 
