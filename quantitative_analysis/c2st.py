@@ -26,20 +26,20 @@ class C2ST(torch.nn.Module):
 
         seq_layers = [
             torch.nn.Conv2d(3, 16, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25),
+            #torch.nn.LeakyReLU(0.2, inplace=True),
+            #torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.5),
+            #torch.nn.LeakyReLU(0.2, inplace=True),
+            #torch.nn.Dropout2d(0.5),
 
             torch.nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25),
+            #torch.nn.LeakyReLU(0.2, inplace=True),
+            #torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(64, 128, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25)
+            #torch.nn.LeakyReLU(0.2, inplace=True),
+            #torch.nn.Dropout2d(0.25)
         ]
 
         self.conv = torch.nn.Sequential(*seq_layers)
@@ -50,12 +50,12 @@ class C2ST(torch.nn.Module):
             filtered_image_size = int((filtered_image_size + 2 * padding - kernel_size) / stride + 1)
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(128 * filtered_image_size ** 2, 100),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(100, 10),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(10, 2),
-            torch.nn.Sigmoid()
+            torch.nn.Linear(128 * filtered_image_size ** 2, 2),
+            #torch.nn.Sigmoid(),
+            #torch.nn.Linear(100, 10),
+            #torch.nn.Sigmoid(),
+            #torch.nn.Linear(10, 2),
+            #torch.nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -75,6 +75,8 @@ def evaluate_model(model, dataloader, name):
     for batch_data, batch_labels in dataloader:
         predictions = model.forward(batch_data)
         loss = criterion(predictions, batch_labels)
+
+        #print(predictions, torch.argmax(predictions, axis=1), batch_labels)
 
         accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
@@ -132,7 +134,7 @@ class ImageDataset(torch.utils.data.Dataset):
             self.output_data[index], requires_grad=False, device=device).long()
 
 
-def do_train(device, SAVE):
+def do_train():
     if len(sys.argv) != 5:
         print(
             'Usage: python3 %s train <path to training dataset> <path to validation dataset> <path to test dataset>' %
@@ -190,10 +192,10 @@ def do_train(device, SAVE):
         torch.save(model.state_dict(), "model.torch")
 
 
-def do_evaluate(device):
+def do_evaluate():
     if len(sys.argv) != 4:
         print(
-            'Usage: python3 %s evaluate <path to evaluation dataset> <true classification (0 - fake; 1 - real)>' %
+            'Usage: python3 %s evaluate <path to evaluation dataset> <true classification (1 - fake; 0 - real)>' %
             sys.argv[0])
         exit(1)
 
@@ -201,8 +203,9 @@ def do_evaluate(device):
 
     # Applies a label of 1 to each case
     file_data = np.load(sys.argv[2])
+    labelled_dataset = file_data, np.full(file_data.shape[0], int(sys.argv[3]))
 
-    labelled_dataset = file_data, np.full((file_data.shape[0]), int(sys.argv[3]))
+    print(labelled_dataset[0].shape, labelled_dataset[1].shape)
 
     data = ImageDataset(labelled_dataset, device)
     evaluation_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
@@ -210,10 +213,8 @@ def do_evaluate(device):
     print("Evaluation dataset loaded")
 
     model = C2ST(data.get_shape()).to(device)
-
-    evaluate_model(model, evaluation_dataloader, 'Evaluation')
-
     model.load_state_dict(torch.load("model.torch"))
+
     evaluate_model(model, evaluation_dataloader, 'Evaluation')
 
 
@@ -221,7 +222,7 @@ if __name__ == '__main__':
 
     CUDA = True
     SAVE = True
-    USE_EXISTING = True
+    USE_EXISTING = False
 
     device = torch.device("cuda" if CUDA and torch.cuda.is_available() else "cpu")
 
@@ -229,10 +230,10 @@ if __name__ == '__main__':
         print('Usage: python3 %s <operation: train/evaluate> ...' % sys.argv[0])
 
     if sys.argv[1] == 'train':
-        do_train(device, SAVE)
+        do_train()
 
     elif sys.argv[1] == 'evaluate':
-        do_evaluate(device)
+        do_evaluate()
 
     else:
         raise Exception("oops wrong operation")

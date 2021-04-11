@@ -20,8 +20,8 @@ import numpy as np
 PERC_TEST = 0.1
 PERC_VALID = 0.1
 
-# Maximum number of elements between all of the data sets
-TOTAL_MAX = 10000
+# Maximum number of elements from a class
+CLASS_MAX = 5000
 
 
 def parallel_shuffle(data, target):
@@ -48,65 +48,65 @@ if __name__ == '__main__':
 
     num_datasets = len(sys.argv) - 1
 
-    input_data = None
-    output_data = np.array([])
-    num_images_total = 0
+    input_train_val_data = None
+    output_train_val_data = np.array([])
+
+    testing_sets = {}
 
     # Unpickle the data sets and shove them into the arrays
     for i in range(num_datasets):
         path = sys.argv[i + 1]
 
-        images = np.load(path)
+        images = np.load(path)[:CLASS_MAX]
 
-        num_images = images.shape[0]
-        num_images_total += num_images
+        test_partition = int(PERC_TEST * images.shape[0])
+        images_test, images_val_train = np.split(images, [test_partition])
+
+        # Extract testing cases
+        testing_sets[i] = (
+            images_test, np.full((images_test.shape[0]), i)
+        )
+
+        # Extract training + validation cases
+        num_images_val_train = images_val_train.shape[0]
 
         # Add input data to array
-        if isinstance(input_data, type(None)):
-            input_data = images
+        if isinstance(input_train_val_data, type(None)):
+            input_train_val_data = images_val_train
         else:
-            input_data = np.concatenate([images, input_data], axis=0)
+            input_train_val_data = np.concatenate([images_val_train, input_train_val_data], axis=0)
 
         # Add expected output (i.e. the dataset class)
-        output_data = np.concatenate(
+        output_train_val_data = np.concatenate(
             [
-                output_data,
-                np.full((num_images), i)
+                output_train_val_data,
+                np.full((num_images_val_train), i)
             ],
             axis=0
         )
 
     # Shuffle the data
-    parallel_shuffle(input_data, output_data)
-
-    # Truncate data
-    input_data = input_data[:TOTAL_MAX]
-    output_data = output_data[:TOTAL_MAX]
-
-    print(output_data.shape, input_data.shape)
+    parallel_shuffle(input_train_val_data, output_train_val_data)
 
     # Divide into train, validation, and test sets
-    num_cases = output_data.shape[0]
+    num_cases_val_train = output_train_val_data.shape[0]
 
-    # [Test] [Validation] [Training]
+    # [Validation] [Training]
 
-    num_images_total = min(num_images_total, TOTAL_MAX)
+    validation_partition = int((PERC_VALID / (1 - PERC_TEST)) * num_cases_val_train)
 
-    test_partition = int(PERC_TEST * num_images_total)
-    validation_partition = int((PERC_TEST + PERC_VALID) * num_images_total)
+    validation_input_data, training_input_data = np.split(input_train_val_data, [validation_partition])
+    validation_output_data, training_output_data = np.split(output_train_val_data, [validation_partition])
 
-    test_input_data, validation_input_data, training_input_data = np.split(input_data,
-                                                                           [test_partition, validation_partition])
-    test_output_data, validation_output_data, training_output_data = np.split(output_data,
-                                                                              [test_partition, validation_partition])
     # Save to disk
-    with open("%d-%d-combined-test-dataset.pkl" % (num_datasets, len(test_input_data)), 'wb') as file:
-        pickle.dump((test_input_data, test_output_data), file)
+    for t in testing_sets:
+        with open("testing-%d-%d-combined-dataset-%d.pkl" % (num_datasets, len(testing_sets[t]), t), 'wb') as file:
+            pickle.dump(testing_sets[t], file)
 
-    with open("%d-%d-combined-validation-dataset.pkl" % (num_datasets, len(validation_input_data)), 'wb') as file:
+    with open("validation-%d-%d-combined-dataset.pkl" % (num_datasets, len(validation_input_data)), 'wb') as file:
         pickle.dump((validation_input_data, validation_output_data), file)
 
-    with open("%d-%d-combined-training-dataset.pkl" % (num_datasets, len(training_input_data)), 'wb') as file:
+    with open("validation-%d-%d-combined-dataset.pkl" % (num_datasets, len(training_input_data)), 'wb') as file:
         pickle.dump((training_input_data, training_output_data), file)
 
     print("Output datasets written to disk")
