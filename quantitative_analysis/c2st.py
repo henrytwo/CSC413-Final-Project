@@ -12,6 +12,7 @@ C2ST Analysis
 import pickle
 import sys
 
+import numpy as np
 import torch
 from tqdm import tqdm
 
@@ -131,21 +132,15 @@ class ImageDataset(torch.utils.data.Dataset):
             self.output_data[index], requires_grad=False, device=device).long()
 
 
-if __name__ == '__main__':
-
-    CUDA = True
-    SAVE = True
-    USE_EXISTING = True
-    TRAIN = False
-
-    device = torch.device("cuda" if CUDA and torch.cuda.is_available() else "cpu")
-
-    if len(sys.argv) != 4:
-        print('Usage: python3 %s <path to training dataset> <path to validation dataset> <path to test dataset>' % sys.argv[0])
+def do_train(device, SAVE):
+    if len(sys.argv) != 5:
+        print(
+            'Usage: python3 %s train <path to training dataset> <path to validation dataset> <path to test dataset>' %
+            sys.argv[0])
         exit(1)
 
     # Load training dataset
-    with open(sys.argv[1], 'rb') as file:
+    with open(sys.argv[2], 'rb') as file:
         print("Loading training dataset")
         data = ImageDataset(pickle.load(file), device)
         training_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
@@ -159,7 +154,7 @@ if __name__ == '__main__':
         print("Training dataset loaded")
 
     # Load validation dataset
-    with open(sys.argv[2], 'rb') as file:
+    with open(sys.argv[3], 'rb') as file:
         print("Loading validation dataset")
         data = ImageDataset(pickle.load(file), device)
         validation_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
@@ -167,7 +162,7 @@ if __name__ == '__main__':
         print("Validation dataset loaded")
 
     # Load test dataset
-    with open(sys.argv[3], 'rb') as file:
+    with open(sys.argv[4], 'rb') as file:
         print("Loading test dataset")
         data = ImageDataset(pickle.load(file), device)
         test_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
@@ -182,12 +177,9 @@ if __name__ == '__main__':
     else:
         print("Generating new model")
 
-    if TRAIN:
-        print("Training!")
-        train(model=model, epochs=10, training_dataloader=training_dataloader,
-              validation_dataloader=validation_dataloader)
-        print("Done training")
-
+    print("Training!")
+    train(model=model, epochs=10, training_dataloader=training_dataloader,
+          validation_dataloader=validation_dataloader)
     print("Done training")
 
     # TODO: Plot loss curves
@@ -196,3 +188,51 @@ if __name__ == '__main__':
     if SAVE:
         print("Writing model to disk")
         torch.save(model.state_dict(), "model.torch")
+
+
+def do_evaluate(device):
+    if len(sys.argv) != 4:
+        print(
+            'Usage: python3 %s evaluate <path to evaluation dataset> <true classification (0 - fake; 1 - real)>' %
+            sys.argv[0])
+        exit(1)
+
+    print("Loading test dataset")
+
+    # Applies a label of 1 to each case
+    file_data = np.load(sys.argv[2])
+
+    labelled_dataset = file_data, np.full((file_data.shape[0]), int(sys.argv[3]))
+
+    data = ImageDataset(labelled_dataset, device)
+    evaluation_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
+
+    print("Evaluation dataset loaded")
+
+    model = C2ST(data.get_shape()).to(device)
+
+    evaluate_model(model, evaluation_dataloader, 'Evaluation')
+
+    model.load_state_dict(torch.load("model.torch"))
+    evaluate_model(model, evaluation_dataloader, 'Evaluation')
+
+
+if __name__ == '__main__':
+
+    CUDA = True
+    SAVE = True
+    USE_EXISTING = True
+
+    device = torch.device("cuda" if CUDA and torch.cuda.is_available() else "cpu")
+
+    if len(sys.argv) < 2:
+        print('Usage: python3 %s <operation: train/evaluate> ...' % sys.argv[0])
+
+    if sys.argv[1] == 'train':
+        do_train(device, SAVE)
+
+    elif sys.argv[1] == 'evaluate':
+        do_evaluate(device)
+
+    else:
+        raise Exception("oops wrong operation")
