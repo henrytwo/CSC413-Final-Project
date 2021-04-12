@@ -7,6 +7,9 @@ By Henry Tu & Seel Patel
 #################################
 
 Sharpness analysis
+
+TODO: Figure out what this thing is actually supposed to do...
+      skimage doesn't seem to have a function for measuring sharpness
 """
 
 import sys

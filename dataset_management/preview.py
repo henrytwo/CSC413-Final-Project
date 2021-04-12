@@ -38,7 +38,7 @@ if __name__ == '__main__':
 
     print(img_subset.shape)
 
-    print(img_subset)
+    #print(img_subset)
 
     plt.imshow(img_subset)
     plt.show()
