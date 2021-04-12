@@ -19,27 +19,27 @@ from tqdm import tqdm
 
 class C2ST(torch.nn.Module):
 
-    def __init__(self, size, kernel_size=5, stride=2, padding=1):
+    def __init__(self, size, kernel_size=3, stride=2, padding=1):
         super().__init__()
 
         NUM_CONV_LAYERS = 4
 
         seq_layers = [
             torch.nn.Conv2d(3, 16, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25),
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.5),
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.5),
 
             torch.nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25),
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(64, 128, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25)
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.25)
         ]
 
         self.conv = torch.nn.Sequential(*seq_layers)
@@ -50,12 +50,12 @@ class C2ST(torch.nn.Module):
             filtered_image_size = int((filtered_image_size + 2 * padding - kernel_size) / stride + 1)
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(128 * filtered_image_size ** 2, 1),
-            #torch.nn.Sigmoid(),
-            #torch.nn.Linear(100, 10),
-            #torch.nn.Sigmoid(),
-            #torch.nn.Linear(10, 1),
-            #torch.nn.Sigmoid()
+            torch.nn.Linear(128 * filtered_image_size ** 2, 2),
+            # torch.nn.Sigmoid(),
+            # torch.nn.Linear(100, 10),
+            # torch.nn.Sigmoid(),
+            # torch.nn.Linear(10, 2),
+            # torch.nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -68,17 +68,17 @@ class C2ST(torch.nn.Module):
 def evaluate_model(model, dataloader, name):
     model.eval()
 
-    criterion = torch.nn.BCEWithLogitsLoss()
+    criterion = torch.nn.CrossEntropyLoss()
     accuracy = 0
     loss = 0
 
     for batch_data, batch_labels in dataloader:
-        predictions = model.forward(batch_data).reshape(-1)
+        predictions = model.forward(batch_data)
+        loss = criterion(predictions, batch_labels)
 
-        print(predictions, batch_labels)
+        print(torch.argmax(predictions, axis=1), batch_labels)
 
-        loss += criterion(predictions, batch_labels - 0.5).item()
-        accuracy += torch.sum(predictions.sigmoid().round() == batch_labels).item()
+        accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
     avg_accuracy = 100 * (accuracy / len(dataloader.dataset))
 
@@ -87,8 +87,8 @@ def evaluate_model(model, dataloader, name):
     return loss
 
 
-def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
-    criterion = torch.nn.BCEWithLogitsLoss()
+def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
+    criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     evaluate_model(model, validation_dataloader, 'Validation')
@@ -110,12 +110,11 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
         for batch_data, batch_labels in training_dataloader:
             optimizer.zero_grad()
 
-            predictions = model.forward(batch_data).reshape(-1)
+            predictions = model.forward(batch_data)
+            loss = criterion(predictions, batch_labels)
 
-            loss = criterion(predictions, batch_labels - 0.5)
             epoch_loss += loss.item()
-
-            accuracy += torch.sum(predictions.sigmoid().round() == batch_labels).item()
+            accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
             # Optimize beep boop
             loss.backward()
@@ -126,7 +125,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
                 epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
 
             # Print validation loss
-            validation_loss = evaluate_model(model, validation_dataloader, 'Validation')
+            validation_loss = evaluate_model(model, validation_dataloader, 'Validation').item()
 
             training_losses.append(epoch_loss)
             validation_losses.append(validation_loss)
@@ -168,10 +167,11 @@ class ImageDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         return torch.tensor(self.input_data[index], requires_grad=False, device=device).float(), torch.tensor(
-            self.output_data[index], requires_grad=False, device=device).float()
+            self.output_data[index], requires_grad=False, device=device).long()
 
 
 def do_train():
+
     if len(sys.argv) != 4:
         print(
             'Usage: python3 %s train <path to training dataset> <path to validation dataset>' %
