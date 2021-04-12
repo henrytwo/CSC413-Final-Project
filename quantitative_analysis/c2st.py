@@ -13,7 +13,6 @@ import pickle
 import sys
 
 import matplotlib.pyplot as plt
-import numpy as np
 import torch
 from tqdm import tqdm
 
@@ -77,7 +76,7 @@ def evaluate_model(model, dataloader, name):
         predictions = model.forward(batch_data)
         loss = criterion(predictions, batch_labels)
 
-        # print(torch.argmax(predictions, axis=1), batch_labels)
+        #print(torch.argmax(predictions, axis=1), batch_labels)
 
         accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
@@ -98,6 +97,9 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
     validation_losses = []
     epoches = []
 
+    best_validation_loss = float('inf')
+    best_model = None
+
     for epoch in tqdm(range(epochs)):
         model.train()
 
@@ -105,11 +107,17 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
 
         epoch_loss = 0
 
+        num_1 = 0
+        num_0 = 0
+
         for batch_data, batch_labels in training_dataloader:
             optimizer.zero_grad()
 
             predictions = model.forward(batch_data)
             loss = criterion(predictions, batch_labels)
+
+            num_1 += torch.sum(batch_labels).item()
+            num_0 += batch_labels.shape[0] - torch.sum(batch_labels).item()
 
             epoch_loss += loss.item()
             accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
@@ -129,10 +137,14 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
             validation_losses.append(validation_loss)
             epoches.append(epoch)
 
-    try:
-        plot_loss(training_losses, validation_losses, epoches)
-    except Exception as e:
-        print(e)
+            if validation_loss < best_validation_loss:
+                best_validation_loss = validation_loss
+                best_model = model.state_dict()
+
+    print("Best validation loss: %f" % best_validation_loss)
+
+    return training_losses, validation_losses, epoches, best_model
+
 
 def plot_loss(train_loss, valid_loss, epoches):
     plt.clf()
@@ -165,7 +177,6 @@ class ImageDataset(torch.utils.data.Dataset):
 
 
 def do_train():
-
     if len(sys.argv) != 4:
         print(
             'Usage: python3 %s train <path to training dataset> <path to validation dataset>' %
@@ -203,13 +214,18 @@ def do_train():
         print("Generating new model")
 
     print("Training!")
-    train(model=model, epochs=100, training_dataloader=training_dataloader,
-          validation_dataloader=validation_dataloader)
+    training_losses, validation_losses, epoches, best_model = train(model=model, epochs=100,
+                                                                    training_dataloader=training_dataloader,
+                                                                    validation_dataloader=validation_dataloader)
     print("Done training")
+
+    model.load_state_dict(best_model)
 
     if SAVE:
         print("Writing model to disk")
         torch.save(model.state_dict(), "model.torch")
+
+    plot_loss(training_losses, validation_losses, epoches)
 
 
 def do_evaluate():
