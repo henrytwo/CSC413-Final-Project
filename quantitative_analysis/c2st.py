@@ -19,27 +19,27 @@ from tqdm import tqdm
 
 class C2ST(torch.nn.Module):
 
-    def __init__(self, size, kernel_size=3, stride=2, padding=1):
+    def __init__(self, size, kernel_size=5, stride=2, padding=1):
         super().__init__()
 
         NUM_CONV_LAYERS = 4
 
         seq_layers = [
             torch.nn.Conv2d(3, 16, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
-            # torch.nn.Dropout2d(0.25),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
-            # torch.nn.Dropout2d(0.5),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.5),
 
             torch.nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
-            # torch.nn.Dropout2d(0.25),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(64, 128, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
-            # torch.nn.Dropout2d(0.25)
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.25)
         ]
 
         self.conv = torch.nn.Sequential(*seq_layers)
@@ -52,10 +52,10 @@ class C2ST(torch.nn.Module):
         self.linear = torch.nn.Sequential(
             torch.nn.Linear(128 * filtered_image_size ** 2, 1),
             #torch.nn.Sigmoid(),
-            # torch.nn.Linear(100, 10),
-            # torch.nn.Sigmoid(),
-            # torch.nn.Linear(10, 2),
-            # torch.nn.Sigmoid()
+            #torch.nn.Linear(100, 10),
+            #torch.nn.Sigmoid(),
+            #torch.nn.Linear(10, 1),
+            #torch.nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -68,15 +68,17 @@ class C2ST(torch.nn.Module):
 def evaluate_model(model, dataloader, name):
     model.eval()
 
-    criterion = torch.nn.BCELoss()
+    criterion = torch.nn.BCEWithLogitsLoss()
     accuracy = 0
     loss = 0
 
     for batch_data, batch_labels in dataloader:
-        predictions = model.forward(batch_data).reshape(-1).sigmoid()
+        predictions = model.forward(batch_data).reshape(-1)
 
-        loss += criterion(predictions, batch_labels).item()
-        accuracy += torch.sum(torch.round(predictions) == batch_labels).item()
+        print(predictions, batch_labels)
+
+        loss += criterion(predictions, batch_labels - 0.5).item()
+        accuracy += torch.sum(predictions.sigmoid().round() == batch_labels).item()
 
     avg_accuracy = 100 * (accuracy / len(dataloader.dataset))
 
@@ -85,8 +87,8 @@ def evaluate_model(model, dataloader, name):
     return loss
 
 
-def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
-    criterion = torch.nn.BCELoss()
+def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
+    criterion = torch.nn.BCEWithLogitsLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     evaluate_model(model, validation_dataloader, 'Validation')
@@ -108,12 +110,12 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
         for batch_data, batch_labels in training_dataloader:
             optimizer.zero_grad()
 
-            predictions = model.forward(batch_data).reshape(-1).sigmoid()
+            predictions = model.forward(batch_data).reshape(-1)
 
-            loss = criterion(predictions, batch_labels)
+            loss = criterion(predictions, batch_labels - 0.5)
             epoch_loss += loss.item()
 
-            accuracy += torch.sum(torch.round(predictions) == batch_labels).item()
+            accuracy += torch.sum(predictions.sigmoid().round() == batch_labels).item()
 
             # Optimize beep boop
             loss.backward()

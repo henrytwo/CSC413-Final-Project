@@ -1,0 +1,3 @@
+Real dataset path: ../dataset_management/raw-dataset/images_0-swapped.npy
+GAN dataset path: ../dataset_management/raw-dataset/images_0-swapped.npy
+Average PSNR: 9.037246

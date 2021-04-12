@@ -1,0 +1,3 @@
+Real dataset path: ../dataset_management/raw-dataset/images_0-swapped.npy
+GAN dataset path: ../dataset_management/coco-dataset/coco_images_5000-normalized-swapped-truncated.npy
+Average PSNR: 9.106148
