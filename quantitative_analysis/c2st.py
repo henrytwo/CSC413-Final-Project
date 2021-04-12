@@ -26,20 +26,20 @@ class C2ST(torch.nn.Module):
 
         seq_layers = [
             torch.nn.Conv2d(3, 16, kernel_size=kernel_size, stride=stride, padding=padding),
-            #torch.nn.LeakyReLU(0.2, inplace=True),
-            #torch.nn.Dropout2d(0.25),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride, padding=padding),
-            #torch.nn.LeakyReLU(0.2, inplace=True),
-            #torch.nn.Dropout2d(0.5),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.5),
 
             torch.nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride, padding=padding),
-            #torch.nn.LeakyReLU(0.2, inplace=True),
-            #torch.nn.Dropout2d(0.25),
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(64, 128, kernel_size=kernel_size, stride=stride, padding=padding),
-            #torch.nn.LeakyReLU(0.2, inplace=True),
-            #torch.nn.Dropout2d(0.25)
+            torch.nn.LeakyReLU(0.2, inplace=True),
+            torch.nn.Dropout2d(0.25)
         ]
 
         self.conv = torch.nn.Sequential(*seq_layers)
@@ -50,12 +50,12 @@ class C2ST(torch.nn.Module):
             filtered_image_size = int((filtered_image_size + 2 * padding - kernel_size) / stride + 1)
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(128 * filtered_image_size ** 2, 2),
-            #torch.nn.Sigmoid(),
-            #torch.nn.Linear(100, 10),
-            #torch.nn.Sigmoid(),
-            #torch.nn.Linear(10, 2),
-            #torch.nn.Sigmoid()
+            torch.nn.Linear(128 * filtered_image_size ** 2, 100),
+            torch.nn.Sigmoid(),
+            torch.nn.Linear(100, 10),
+            torch.nn.Sigmoid(),
+            torch.nn.Linear(10, 2),
+            torch.nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -85,7 +85,7 @@ def evaluate_model(model, dataloader, name):
     print("%s Loss: %f, %s Accuracy: %f%%" % (name, loss, name, avg_accuracy))
 
 
-def train(model, epochs, training_dataloader, validation_dataloader, lr=0.01):
+def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
@@ -120,7 +120,7 @@ class ImageDataset(torch.utils.data.Dataset):
     def __init__(self, data, device):
         super(ImageDataset, self).__init__()
         self.input_data = data[0]
-        self.output_data = data[1] == 0
+        self.output_data = data[1]
         self.device = device
 
     def __len__(self):
@@ -172,7 +172,7 @@ def do_train():
         print("Generating new model")
 
     print("Training!")
-    train(model=model, epochs=10, training_dataloader=training_dataloader,
+    train(model=model, epochs=100, training_dataloader=training_dataloader,
           validation_dataloader=validation_dataloader)
     print("Done training")
 

@@ -17,12 +17,8 @@ import numpy as np
 # 10% of total is set aside for test
 # 20% of total is set aside for validation
 # Remainder is used for testing
-PERC_TEST = 0.1
-PERC_VALID = 0.1
-
-# Maximum number of elements from a class
-CLASS_MAX = 5000
-
+PERC_TEST = 0.25
+PERC_VALID = 0.25
 
 def parallel_shuffle(data, target):
     """
@@ -40,9 +36,9 @@ if __name__ == '__main__':
     Order should be:
     Real Images, StyleGAN, DCGAN
     """
-    if len(sys.argv) < 2:
+    if len(sys.argv) != 4:
         print(
-            'Usage: python3 %s <paths to npy file>\nThe classifier index will be to the dataset\'s parameter index' %
+            'Usage: python3 %s <raw dataset> <stylegan> <coco>' %
             sys.argv[0])
         exit(1)
 
@@ -56,15 +52,16 @@ if __name__ == '__main__':
     # Unpickle the data sets and shove them into the arrays
     for i in range(num_datasets):
         path = sys.argv[i + 1]
+        dataset_class = 1 if i == 0 else 0
 
-        images = np.load(path)[:CLASS_MAX]
+        images = np.load(path)
 
         test_partition = int(PERC_TEST * images.shape[0])
         images_test, images_val_train = np.split(images, [test_partition])
 
         # Extract testing cases
         testing_sets[i] = (
-            images_test, np.full((images_test.shape[0]), i)
+            images_test, np.full((images_test.shape[0]), dataset_class)
         )
 
         # Extract training + validation cases
@@ -80,7 +77,7 @@ if __name__ == '__main__':
         output_train_val_data = np.concatenate(
             [
                 output_train_val_data,
-                np.full((num_images_val_train), i)
+                np.full((num_images_val_train), dataset_class)
             ],
             axis=0
         )
@@ -100,7 +97,13 @@ if __name__ == '__main__':
 
     # Save to disk
     for t in testing_sets:
-        with open("testing-%d-%d-combined-dataset-%d.pkl" % (num_datasets, len(testing_sets[t]), t), 'wb') as file:
+        name = [
+           'raw',
+           'stylegan',
+           'coco'
+        ][t]
+
+        with open("testing-%d-%d-combined-dataset-%s.pkl" % (num_datasets, len(testing_sets[t]), name), 'wb') as file:
             pickle.dump(testing_sets[t], file)
 
     with open("validation-%d-%d-combined-dataset.pkl" % (num_datasets, len(validation_input_data)), 'wb') as file:
