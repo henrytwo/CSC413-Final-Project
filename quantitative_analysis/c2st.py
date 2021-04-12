@@ -12,6 +12,7 @@ C2ST Analysis
 import pickle
 import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from tqdm import tqdm
@@ -19,27 +20,27 @@ from tqdm import tqdm
 
 class C2ST(torch.nn.Module):
 
-    def __init__(self, size, kernel_size=5, stride=2, padding=1):
+    def __init__(self, size, kernel_size=3, stride=2, padding=1):
         super().__init__()
 
         NUM_CONV_LAYERS = 4
 
         seq_layers = [
             torch.nn.Conv2d(3, 16, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25),
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.5),
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.5),
 
             torch.nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25),
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(64, 128, kernel_size=kernel_size, stride=stride, padding=padding),
-            torch.nn.LeakyReLU(0.2, inplace=True),
-            torch.nn.Dropout2d(0.25)
+            # torch.nn.LeakyReLU(0.2, inplace=True),
+            # torch.nn.Dropout2d(0.25)
         ]
 
         self.conv = torch.nn.Sequential(*seq_layers)
@@ -50,12 +51,12 @@ class C2ST(torch.nn.Module):
             filtered_image_size = int((filtered_image_size + 2 * padding - kernel_size) / stride + 1)
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(128 * filtered_image_size ** 2, 100),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(100, 10),
-            torch.nn.Sigmoid(),
-            torch.nn.Linear(10, 2),
-            torch.nn.Sigmoid()
+            torch.nn.Linear(128 * filtered_image_size ** 2, 2),
+            # torch.nn.Sigmoid(),
+            # torch.nn.Linear(100, 10),
+            # torch.nn.Sigmoid(),
+            # torch.nn.Linear(10, 2),
+            # torch.nn.Sigmoid()
         )
 
     def forward(self, x):
@@ -76,13 +77,15 @@ def evaluate_model(model, dataloader, name):
         predictions = model.forward(batch_data)
         loss = criterion(predictions, batch_labels)
 
-        #print(predictions, torch.argmax(predictions, axis=1), batch_labels)
+        # print(torch.argmax(predictions, axis=1), batch_labels)
 
         accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
     avg_accuracy = 100 * (accuracy / len(dataloader.dataset))
 
     print("%s Loss: %f, %s Accuracy: %f%%" % (name, loss, name, avg_accuracy))
+
+    return loss
 
 
 def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
@@ -91,10 +94,16 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
 
     evaluate_model(model, validation_dataloader, 'Validation')
 
+    training_losses = []
+    validation_losses = []
+    epoches = []
+
     for epoch in tqdm(range(epochs)):
         model.train()
 
         accuracy = 0
+
+        epoch_loss = 0
 
         for batch_data, batch_labels in training_dataloader:
             optimizer.zero_grad()
@@ -102,6 +111,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
             predictions = model.forward(batch_data)
             loss = criterion(predictions, batch_labels)
 
+            epoch_loss += loss.item()
             accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 
             # Optimize beep boop
@@ -113,7 +123,27 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
                 epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
 
             # Print validation loss
-            evaluate_model(model, validation_dataloader, 'Validation')
+            validation_loss = evaluate_model(model, validation_dataloader, 'Validation').item()
+
+            training_losses.append(epoch_loss)
+            validation_losses.append(validation_loss)
+            epoches.append(epoch)
+
+    try:
+        plot_loss(training_losses, validation_losses, epoches)
+    except Exception as e:
+        print(e)
+
+def plot_loss(train_loss, valid_loss, epoches):
+    plt.clf()
+    plt.plot(epoches, train_loss, "b", label="Train")
+    plt.plot(epoches, valid_loss, "g", label="Validation")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.savefig('c2st-loss')
+    plt.draw()
+    plt.show()
 
 
 class ImageDataset(torch.utils.data.Dataset):
@@ -135,6 +165,7 @@ class ImageDataset(torch.utils.data.Dataset):
 
 
 def do_train():
+
     if len(sys.argv) != 4:
         print(
             'Usage: python3 %s train <path to training dataset> <path to validation dataset>' %
@@ -175,8 +206,6 @@ def do_train():
     train(model=model, epochs=100, training_dataloader=training_dataloader,
           validation_dataloader=validation_dataloader)
     print("Done training")
-
-    # TODO: Plot loss curves
 
     if SAVE:
         print("Writing model to disk")
