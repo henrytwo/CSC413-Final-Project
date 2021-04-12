@@ -50,8 +50,8 @@ class C2ST(torch.nn.Module):
             filtered_image_size = int((filtered_image_size + 2 * padding - kernel_size) / stride + 1)
 
         self.linear = torch.nn.Sequential(
-            torch.nn.Linear(128 * filtered_image_size ** 2, 2),
-            # torch.nn.Sigmoid(),
+            torch.nn.Linear(128 * filtered_image_size ** 2, 1),
+            #torch.nn.Sigmoid(),
             # torch.nn.Linear(100, 10),
             # torch.nn.Sigmoid(),
             # torch.nn.Linear(10, 2),
@@ -68,17 +68,15 @@ class C2ST(torch.nn.Module):
 def evaluate_model(model, dataloader, name):
     model.eval()
 
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.BCELoss()
     accuracy = 0
     loss = 0
 
     for batch_data, batch_labels in dataloader:
-        predictions = model.forward(batch_data)
-        loss = criterion(predictions, batch_labels)
+        predictions = model.forward(batch_data).reshape(-1).sigmoid()
 
-        #print(torch.argmax(predictions, axis=1), batch_labels)
-
-        accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
+        loss += criterion(predictions, batch_labels).item()
+        accuracy += torch.sum(torch.round(predictions) == batch_labels).item()
 
     avg_accuracy = 100 * (accuracy / len(dataloader.dataset))
 
@@ -88,7 +86,7 @@ def evaluate_model(model, dataloader, name):
 
 
 def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
-    criterion = torch.nn.CrossEntropyLoss()
+    criterion = torch.nn.BCELoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     evaluate_model(model, validation_dataloader, 'Validation')
@@ -107,20 +105,15 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
 
         epoch_loss = 0
 
-        num_1 = 0
-        num_0 = 0
-
         for batch_data, batch_labels in training_dataloader:
             optimizer.zero_grad()
 
-            predictions = model.forward(batch_data)
+            predictions = model.forward(batch_data).reshape(-1).sigmoid()
+
             loss = criterion(predictions, batch_labels)
-
-            num_1 += torch.sum(batch_labels).item()
-            num_0 += batch_labels.shape[0] - torch.sum(batch_labels).item()
-
             epoch_loss += loss.item()
-            accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
+
+            accuracy += torch.sum(torch.round(predictions) == batch_labels).item()
 
             # Optimize beep boop
             loss.backward()
@@ -131,7 +124,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
                 epoch, loss, 100 * accuracy / len(training_dataloader.dataset)))
 
             # Print validation loss
-            validation_loss = evaluate_model(model, validation_dataloader, 'Validation').item()
+            validation_loss = evaluate_model(model, validation_dataloader, 'Validation')
 
             training_losses.append(epoch_loss)
             validation_losses.append(validation_loss)
@@ -173,7 +166,7 @@ class ImageDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         return torch.tensor(self.input_data[index], requires_grad=False, device=device).float(), torch.tensor(
-            self.output_data[index], requires_grad=False, device=device).long()
+            self.output_data[index], requires_grad=False, device=device).float()
 
 
 def do_train():
