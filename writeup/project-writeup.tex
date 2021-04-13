@@ -85,7 +85,10 @@ commentstyle = \color{red}\ttfamily
         By combining these two forms of analysis, we hope to gain insight into the relationship between performance metrics and the generated output of the models.
         \section{Introduction}
         \label{sec:introduction}
-        bsbsbsbsbsbs
+        StyleGAN and COCO-GAN generate images using different techniques to accomplish two different goals: StyleGAN is designed such that high level features of the output image can be finely tuned and adjusted (e.g. lighting, hair colour, etc.)\cite{stylegan}.
+        On the other hand, COCO-GAN generates each part of the image separately before stitching it together in order to simulate the human perception of vision\cite{cocogan}.
+        As a result, we expected each model to generate images with different qualities that relate to their designed tasks.\\\\
+        Although we tried to analyze the models using all the metrics listed in the Abstract, there were a few challenges involved with getting the desired results.
 
     \end{multicols}
     \newpage
