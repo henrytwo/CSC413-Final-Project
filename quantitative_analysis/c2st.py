@@ -14,6 +14,7 @@ import sys
 
 import matplotlib.pyplot as plt
 import torch
+import copy
 from tqdm import tqdm
 
 
@@ -141,7 +142,7 @@ def train(model, epochs, training_dataloader, validation_dataloader, lr=0.1):
 
             if validation_loss < best_validation_loss:
                 best_validation_loss = validation_loss
-                best_model = model.state_dict()
+                best_model = copy.deepcopy(model.state_dict())
 
     print("Best validation loss: %f" % best_validation_loss)
 
@@ -210,12 +211,6 @@ def do_train():
 
     model = C2ST(data.get_shape()).to(device)
 
-    if USE_EXISTING:
-        print("Loading model from disk")
-        model.load_state_dict(torch.load("model.torch"))
-    else:
-        print("Generating new model")
-
     print("Training!")
     training_losses, validation_losses, epoches, best_model = train(model=model, epochs=100,
                                                                     training_dataloader=training_dataloader,
@@ -232,16 +227,16 @@ def do_train():
 
 
 def do_evaluate():
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 4:
         print(
-            'Usage: python3 %s evaluate <path to evaluation dataset>' %
+            'Usage: python3 %s evaluate <path to model> <path to evaluation dataset>' %
             sys.argv[0])
         exit(1)
 
     print("Loading test dataset")
 
     # Applies a label of 1 to each case
-    with open(sys.argv[2], 'rb') as file:
+    with open(sys.argv[3], 'rb') as file:
         print("Loading evaluation dataset")
         data = ImageDataset(pickle.load(file), device)
         evaluation_dataloader = torch.utils.data.DataLoader(data, batch_size=200)
@@ -249,7 +244,7 @@ def do_evaluate():
     print("Evaluation dataset loaded")
 
     model = C2ST(data.get_shape()).to(device)
-    model.load_state_dict(torch.load("model.torch"))
+    model.load_state_dict(torch.load(sys.argv[2]))
 
     evaluate_model(model, evaluation_dataloader, 'Evaluation')
 
@@ -258,8 +253,6 @@ if __name__ == '__main__':
 
     CUDA = True
     SAVE = True
-    USE_EXISTING = False
-
     device = torch.device("cuda" if CUDA and torch.cuda.is_available() else "cpu")
 
     if len(sys.argv) < 2:

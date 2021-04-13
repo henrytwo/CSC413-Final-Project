@@ -36,7 +36,7 @@ if __name__ == '__main__':
     Order should be:
     Real Images, StyleGAN, DCGAN
     """
-    if len(sys.argv) != 4:
+    if len(sys.argv) < 3:
         print(
             'Usage: python3 %s <raw dataset> <stylegan> <coco>' %
             sys.argv[0])
