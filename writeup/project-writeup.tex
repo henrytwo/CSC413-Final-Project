@@ -6,15 +6,27 @@
 \usepackage{amsmath,amsthm,amssymb}
 \usepackage[margin=2.5cm]{geometry}
 \usepackage{mathtools}
-\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
-\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
 \usepackage{graphicx}
 \usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{hyperref}
 
+% Math stuff
+\DeclarePairedDelimiter{\ceil}{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+% Image stuff
 \graphicspath{ {.} }
 
+% URL Stuff
+\hypersetup{
+colorlinks=true,
+linkcolor=blue,
+filecolor=magenta,
+urlcolor=cyan,
+}
 
-\usepackage{fancyhdr}
+% Header/Foodter setup
 \pagestyle{fancy}
 \fancyhf{}
 \rhead{CSC413 Final Project}
@@ -22,47 +34,86 @@
 \rfoot{Page \thepage}
 \lfoot{April 18, 2021}
 
+% Code style setup
 \lstdefinestyle{Python}{
-    language        = Python,
-    frame           = lines,
-    numbers         = left,
-    basicstyle      = \scriptsize,
-    keywordstyle    = \color{blue},
-    stringstyle     = \color{green},
-    commentstyle    = \color{red}\ttfamily
+language = Python,
+frame = lines,
+numbers = left,
+basicstyle = \scriptsize,
+keywordstyle = \color{blue},
+stringstyle = \color{green},
+commentstyle = \color{red}\ttfamily
 }
 
-
+% To be honest, I have no idea what this is used for
 \makeatletter
 \renewcommand*\env@matrix[1][*\c@MaxMatrixCols c]{%
-  \hskip -\arraycolsep
-  \let\@ifnextchar\new@ifnextchar
-  \array{#1}}
+\hskip -\arraycolsep
+\let\@ifnextchar\new@ifnextchar
+\array{#1}}
 \makeatother
 \onehalfspacing
 
 % Some not sketchy latex
 \begin{document}
-\begin{center}
-    \textbf{Comparing the interpretability of different GAN architectures}
-\end{center}
-\begin{minipage}{.5\textwidth}
-            \centering
-            Henry Tu\\
-            University of Toronto
-\end{minipage}
-\begin{minipage}{.5\textwidth}
-            \centering
-            Seel Patel\\
-            University of Toronto
-\end{minipage}
-\\\\
-% Document starts here
-\textbf{Abstract}\\
-gans are very cool and we want to make them fight [TODO: Just copy it from the proposal and remember to add the footnotes]
-\\\\
-\textbf{Introduction}\\
-bsbsbsbsbsbs
-\\\\
-\textbf{References}\\
+    \begin{center}
+        \textbf{Comparing the interpretability of different GAN architectures}
+    \end{center}
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \textbf{Henry Tu}\\
+        University of Toronto
+    \end{minipage}
+    \begin{minipage}{.5\textwidth}
+        \centering
+        \textbf{Seel Patel}\\
+        University of Toronto
+    \end{minipage}
+    \\
+
+    \begin{multicols}{2}
+
+        % Document starts here
+        \section{Abstract}
+        \label{sec:abstract}
+
+        A Generative Adversarial Network (GAN) uses an adversarial process between two models which are simultaneously trained to estimate a generative model.\cite{gan}
+        There are many variants of GAN architectures, such as COCO-GAN\cite{cocogan} and StyleGAN\cite{stylegan}, which both have the ability to generate synthetic images which mimic real images.\\\\
+        We are exploring methods of comparing the quantitative performance of these architectures with their interpretability.
+        Our quantitative measures include C2ST\cite{evaluateGANs}, image quality measures\cite{evaluateGANs}, Maximum Mean Discrepancy (MMD)\cite{evaluateGANs}, etc.\\\\
+        In order to analyze these networks qualitatively, we will use methods such as SmoothGrad\cite{smoothgrad}, Latent Space Exploration\cite{sampleGAN} and nearest neighbour tests\cite{evaluateGANs} to decipher what the networks have learned.\\\\
+        By combining these two forms of analysis, we hope to gain insight into the relationship between performance metrics and the generated output of the models.
+        \section{Introduction}
+        \label{sec:introduction}
+        bsbsbsbsbsbs
+
+    \end{multicols}
+    \newpage
+    \begin{thebibliography}{9}
+        \bibitem{gan}
+        Ian J. Goodfellow, Jean Pouget-Abadie, Mehdi Mirza, Bing Xu, David Warde-Farley, Sherjil Ozair, Aaron Courville, and Yoshua Bengio. (2014)
+        \href{https://papers.nips.cc/paper/2014/file/5ca3e9b122f61f8f06494c97b1afccf3-Paper.pdf}{\textit{Generative Adversarial Networks} }
+
+        \bibitem{cocogan}
+        Chieh Hubert Lin, Chia-Che Chang, Yu-Sheng Chen, Da-Cheng Juan, Wei Wei, Hwann-Tzong Chen. (2019)
+        \href{https://arxiv.org/pdf/1904.00284.pdf}{\textit{COCO-GAN: Generation by Parts via Conditional Coordinating} }
+
+        \bibitem{stylegan}
+        Tero Karras, Samuli Laine, Timo Aila. (2018)
+        \href{https://arxiv.org/pdf/1812.04948.pdf}{\textit{A Style-Based Generator Architecture for Generative Adversarial Networks} }
+
+        \bibitem{evaluateGANs}
+        Brownlee, Jason. (2019)
+        \href{https://machinelearningmastery.com/how-to-evaluate-generative-adversarial-networks/}{\textit{How to Evaluate Generative Adversarial Networks.} }
+
+        \bibitem{smoothgrad}
+        Daniel Smilkov, Nikhil Thorat, Been Kim, Fernanda Viegas, Martin Wattenberg. (2017)
+        \href{https://arxiv.org/pdf/1706.03825.pdf}{\textit{SmoothGrad: removing noise by adding noise} }
+
+        \bibitem{sampleGAN}
+        Tom White. (2016)
+        \href{https://arxiv.org/pdf/1609.04468.pdf}{\textit{Sampling Generative Networks} }
+
+    \end{thebibliography}
+
 \end{document}
