@@ -76,19 +76,34 @@ commentstyle = \color{red}\ttfamily
         % Document starts here
         \section{Abstract}
         \label{sec:abstract}
-
         A Generative Adversarial Network (GAN) uses an adversarial process between two models which are simultaneously trained to estimate a generative model.\cite{gan}
         There are many variants of GAN architectures, such as COCO-GAN\cite{cocogan} and StyleGAN\cite{stylegan}, which both have the ability to generate synthetic images which mimic real images.\\\\
         We are exploring methods of comparing the quantitative performance of these architectures with their interpretability.
         Our quantitative measures include C2ST\cite{evaluateGANs}, image quality measures\cite{evaluateGANs}, Maximum Mean Discrepancy (MMD)\cite{evaluateGANs}, etc.\\\\
         In order to analyze these networks qualitatively, we will use methods such as SmoothGrad\cite{smoothgrad}, Latent Space Exploration\cite{sampleGAN} and nearest neighbour tests\cite{evaluateGANs} to decipher what the networks have learned.\\\\
         By combining these two forms of analysis, we hope to gain insight into the relationship between performance metrics and the generated output of the models.
+
         \section{Introduction}
         \label{sec:introduction}
         StyleGAN and COCO-GAN generate images using different techniques to accomplish two different goals: StyleGAN is designed such that high level features of the output image can be finely tuned and adjusted (e.g. lighting, hair colour, etc.)\cite{stylegan}.
         On the other hand, COCO-GAN generates each part of the image separately before stitching it together in order to simulate the human perception of vision\cite{cocogan}.
         As a result, we expected each model to generate images with different qualities that relate to their designed tasks.\\\\
         Although we tried to analyze the models using all the metrics listed in the Abstract, there were a few challenges involved with getting the desired results.
+
+        \section{Analysis Dataset Generation}
+        \label{sec:dataset}
+        Both GAN models were trained on the LSUN Bedroom dataset\cite{lsunBedroom} at a resolution of $256 \times 256$.
+        Due to time constraints, we used pre-trained models to generate images for our analysis.
+
+        \label{sec:datasetGeneration}
+        \subsection{StyleGAN}
+        \label{subsec:styleganGeneration}
+        NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used to generate 5000 images for analysis.
+        5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{512}$ drawn from a standard normal distribution which each correspond to an output image.
+
+        \subsection{COCO-GAN}
+        \label{subsec:cocoganGeneration}
+
         \section{Quantitative Analysis}
         \label{sec:quantitative}
         \subsection{C2ST}
@@ -138,6 +153,13 @@ commentstyle = \color{red}\ttfamily
         \bibitem{sampleGAN}
         Tom White. (2016)
         \href{https://arxiv.org/pdf/1609.04468.pdf}{\textit{Sampling Generative Networks} }
+
+        \bibitem{lsunBedroom}
+        Yu, Fisher and Zhang, Yinda and Song, Shuran and Seff, Ari and Xiao, Jianxiong. (2015)
+        \href{https://arxiv.org/pdf/1506.03365.pdf}{\textit{LSUN: Construction of a Large-scale Image Dataset using Deep Learning with Humans in the Loop}}
+
+        \bibitem{styleGANCode}
+        NVLabs. (2019) \href{https://github.com/NVlabs/stylegan}{\textit{StyleGAN — Official TensorFlow Implementation}}
 
     \end{thebibliography}
 
