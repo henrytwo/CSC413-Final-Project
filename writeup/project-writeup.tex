@@ -71,7 +71,8 @@ commentstyle = \color{red}\ttfamily
     \end{minipage}
     \\
 
-    \begin{multicols}{2}
+    \begin{multicols*}{2}
+        \raggedcolumns
 
         % Document starts here
         \section{Abstract}
@@ -101,6 +102,7 @@ commentstyle = \color{red}\ttfamily
         NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used to generate 5000 images for analysis.
         5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{512}$ drawn from a standard normal distribution which each correspond to an output image.
 
+
         \subsection{COCO-GAN}
         \label{subsec:cocoganGeneration}
 
@@ -108,7 +110,26 @@ commentstyle = \color{red}\ttfamily
         \label{sec:quantitative}
         \subsection{C2ST}
         \label{subsec:c2st}
-        asd
+        Classifier Two-Sample Tests (C2ST) is used to predict if two samples came from the same distribution\cite{c2st}.
+        In the context of evaluating GANs, we will use C2ST to quantitatively measure how well the models mimic real images.
+        We trained a deep convolutional neural network to perform binary classification.
+        The idea is to compare the margin by which each GAN model is able to trick the classifier to determine how realistic the image is.
+        \\\\
+        To avoid introducing bias, all three datasets (training, validation, test) were equally balanced in real and fake images.
+        The fake images were further divided in half between images from StyleGAN and COCO-GAN .
+        Out of the combined pool of 20000 images, 10000 were allocated for testing, 5000 validation, and 5000 testing.
+        \\\\
+        The classifier was implemented using Pytorch with the following network architecture:
+        \\[insert some stuff here]\\
+        After tuning hyper parameters and performing early stopping with the validation dataset, the following accuracies were attained:
+        \begin{verbatim}Training Accuracy:
+Validation Accuracy:
+Test Accuracy (Real):
+Test Accuracy (StyleGAN):
+Test Accuracy (COCO-GAN):\end{verbatim}
+        As seen here, the model failed to accurately discriminate between the real and generated images.
+        This suggests that the image quality
+
         \subsection{Image Quality}
         \label{subsec:imageQuality}
         asd
@@ -127,7 +148,7 @@ commentstyle = \color{red}\ttfamily
         \subsection{Nearest Neighbours}
         \label{subsec:nearestneighbours}
         asd
-    \end{multicols}
+    \end{multicols*}
     \newpage
     \begin{thebibliography}{9}
         \bibitem{gan}
@@ -160,6 +181,10 @@ commentstyle = \color{red}\ttfamily
 
         \bibitem{styleGANCode}
         NVLabs. (2019) \href{https://github.com/NVlabs/stylegan}{\textit{StyleGAN — Official TensorFlow Implementation}}
+
+        \bibitem{c2st}
+        David Lopez-Paz, Maxime Oquab. (2016)
+        \href{https://research.fb.com/wp-content/uploads/2017/04/neural_tests.pdf?}{\textit{Revisiting Classifier Two-Sample Tests for GAN Evaluation and Causal Discovery}}
 
     \end{thebibliography}
 

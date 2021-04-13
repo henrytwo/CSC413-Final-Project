@@ -26,19 +26,27 @@ class C2ST(torch.nn.Module):
 
         seq_layers = [
             torch.nn.Conv2d(3, 16, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
+
+            torch.nn.BatchNorm2d(16),
+            torch.nn.LeakyReLU(0.2, inplace=True),
             # torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(16, 32, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
+
+            torch.nn.BatchNorm2d(32),
+            torch.nn.LeakyReLU(0.2, inplace=True),
             # torch.nn.Dropout2d(0.5),
 
             torch.nn.Conv2d(32, 64, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
+
+            torch.nn.BatchNorm2d(64),
+            torch.nn.LeakyReLU(0.2, inplace=True),
             # torch.nn.Dropout2d(0.25),
 
             torch.nn.Conv2d(64, 128, kernel_size=kernel_size, stride=stride, padding=padding),
-            # torch.nn.LeakyReLU(0.2, inplace=True),
+
+            torch.nn.BatchNorm2d(128),
+            torch.nn.LeakyReLU(0.2, inplace=True),
             # torch.nn.Dropout2d(0.25)
         ]
 
