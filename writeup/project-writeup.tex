@@ -116,29 +116,49 @@ commentstyle = \color{red}\ttfamily
 with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         The goal is to compare the margin by which each GAN model is able to trick the classifier as a measure of image generation quality.
         \\\\
+        The classifier was implemented using Pytorch with the following network architecture:
+        \begin{verbatim}
+test
+
+
+
+
+\end{verbatim}
+        \\\\
         To avoid introducing bias, all three datasets (training, validation, test) were equally balanced in real and fake images.
         The 5000 fake images were further divided in half between images from StyleGAN and COCO-GAN .
         Out of the combined pool of 10000 images, 5000 were allocated for training, 2500 validation, and 2500 testing.
         \\\\
-        The classifier was implemented using Pytorch with the following network architecture:
-        \begin{verbatim}
-test
-\end{verbatim}
         After tuning hyper parameters and performing early stopping with the validation dataset, the following accuracies were attained:
-        \begin{verbatim}Training Accuracy: 82.1% of 5000
+        \begin{verbatim}Real vs (StyleGAN or COCO-GAN)
+=======================================
+Training Accuracy: 82.1% of 5000
 Validation Accuracy: 66.8% of 2500
 Test Accuracy (Real): 58.4% of 1250
 Test Accuracy (StyleGAN): 62.4% of 625
 Test Accuracy (COCO-GAN): 86.4% of 625\end{verbatim}
-        As seen here, the model failed to accurately discriminate between the real and generated images.
-        This suggests that either the generated images are so good that it can't be distinguished from the real images, or the classifier is ineffective.
-
+        The model was able to identify the origin of image the majority of the time.
+        This data suggests that StyleGAN is better at tricking the classifier than COCO-GAN .
+        To confirm this, we trained additional classifiers using the same architecture and hyperparameters but only using imagines from one of the GAN models.
+        The goal is to test how well the classifier works when isolated to a specific GAN.
+        \begin{verbatim}Real vs StyleGAN
+=======================================
+Training Accuracy: 77.6% of 5000
+Validation Accuracy: 68.1% of 2500
+Test Accuracy (Real): 74.6% of 1250
+Test Accuracy (StyleGAN): 61.4% of 1250\end{verbatim}
+        \begin{verbatim}Real vs COCO-GAN
+=======================================
+Training Accuracy: 87.9% of 5000
+Validation Accuracy: 88.2% of 2500
+Test Accuracy (Real): 96.4% of 1250
+Test Accuracy (COCO-GAN): 76.1% of 1250\end{verbatim}
+        As seen here, the Real vs COCO-GAN classifier performed significantly better than the Real vs StyleGAN classifier.
+        This supports the hypothesis that StyleGAN generates better quality images than COCO-GAN.
         \subsection{Image Quality}
         \label{subsec:imageQuality}
         asd
-        \subsection{MMD}
-        \label{subsec:mmd}
-        asd
+
 
         \section{Qualitative Analysis}
         \label{sec:qualitative}
