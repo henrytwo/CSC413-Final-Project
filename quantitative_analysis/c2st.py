@@ -85,7 +85,7 @@ def evaluate_model(model, dataloader, name):
         predictions = model.forward(batch_data)
         loss = criterion(predictions, batch_labels)
 
-        #print(torch.argmax(predictions, axis=1), batch_labels)
+        print(torch.argmax(predictions, axis=1), batch_labels)
 
         accuracy += torch.sum(torch.argmax(predictions, axis=1) == batch_labels)
 

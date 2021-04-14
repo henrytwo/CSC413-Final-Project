@@ -20,6 +20,7 @@ import numpy as np
 PERC_TEST = 0.25
 PERC_VALID = 0.25
 
+
 def parallel_shuffle(data, target):
     """
     Shuffles two numpy arrays in place and in parallel
@@ -71,7 +72,7 @@ if __name__ == '__main__':
         if isinstance(input_train_val_data, type(None)):
             input_train_val_data = images_val_train
         else:
-            input_train_val_data = np.concatenate([images_val_train, input_train_val_data], axis=0)
+            input_train_val_data = np.concatenate([input_train_val_data, images_val_train], axis=0)
 
         # Add expected output (i.e. the dataset class)
         output_train_val_data = np.concatenate(

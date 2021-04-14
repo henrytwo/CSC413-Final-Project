@@ -117,18 +117,20 @@ commentstyle = \color{red}\ttfamily
         \\\\
         To avoid introducing bias, all three datasets (training, validation, test) were equally balanced in real and fake images.
         The 5000 fake images were further divided in half between images from StyleGAN and COCO-GAN .
-        Out of the combined pool of 10000 images, 5000 were allocated for testing, 2500 validation, and 2500 testing.
+        Out of the combined pool of 10000 images, 5000 were allocated for training, 2500 validation, and 2500 testing.
         \\\\
         The classifier was implemented using Pytorch with the following network architecture:
-        \\[insert some stuff here]\\
+        \begin{verbatim}
+test
+\end{verbatim}
         After tuning hyper parameters and performing early stopping with the validation dataset, the following accuracies were attained:
-        \begin{verbatim}Training Accuracy:
-Validation Accuracy:
-Test Accuracy (Real):
-Test Accuracy (StyleGAN):
-Test Accuracy (COCO-GAN):\end{verbatim}
+        \begin{verbatim}Training Accuracy: 74% of 5000
+Validation Accuracy: 64% of 2500
+Test Accuracy (Real): 39% of 1250
+Test Accuracy (StyleGAN): 48% of 625
+Test Accuracy (COCO-GAN): 39% of 625\end{verbatim}
         As seen here, the model failed to accurately discriminate between the real and generated images.
-        This suggests that the image quality
+        This suggests that either the generated images are so good that it can't be distinguished from the real images, or the classifier is ineffective.
 
         \subsection{Image Quality}
         \label{subsec:imageQuality}
