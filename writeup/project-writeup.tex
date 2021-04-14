@@ -100,10 +100,13 @@ commentstyle = \color{red}\ttfamily
         NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used to generate 5000 images for analysis.
         5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{512}$ drawn from a standard normal distribution which each correspond to an output image.
 
-        \newpage
+
         \subsection{COCO-GAN}
         \label{subsec:cocoganGeneration}
         \begin{verbatim}placeholder spacer
+blah
+blah
+blah
 blah
 blah
 blah \end{verbatim}
@@ -154,7 +157,6 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         To confirm this, we trained additional classifiers using the same architecture, data set distribution, and hyper-parameters but only using images from one of the GAN models.
         (i.e. all 5000 generated images are all from one GAN model)
         The goal is to test how well the classifier performs when isolated to a specific GAN.
-
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
              \hline
              \multicolumn{2}{|c|}{Table 2: Real vs StyleGAN} \\
@@ -170,8 +172,6 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
             Test (StyleGAN) & 61.4\% of 1250  \\
              \hline
         \end{tabular}
-        \\
-
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
              \hline
              \multicolumn{2}{|c|}{Table 3: Real vs COCO-GAN} \\
@@ -189,9 +189,16 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \end{tabular}
         \\\\
         As seen here, the Real vs COCO-GAN classifier (Table 3) performed significantly better than the Real vs StyleGAN classifier (Table 2).
-        This supports the hypothesis that StyleGAN mimics real images better than COCO-GAN.
-        \subsection{Image Quality}
-        \label{subsec:imageQuality}
+        This supports the hypothesis that StyleGAN mimics real images better than COCO-GAN.\\\\
+        Although these results suggest it is more difficult for a classifier to identify a StyleGAN generated image, it by no means shows that it is impossible to train a more accurate classifier.
+        Therefore, we must put the information gathered in the context of the other metrics in order to draw a stronger conclusion.
+
+        \subsection{Image Sharpness}
+        \label{subsec:imageSharpness}
+        asd
+
+        \subsection{Color Distribution}
+        \label{subsec:imageSharpness}
         asd
 
 
@@ -203,6 +210,9 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \subsection{Nearest Neighbours}
         \label{subsec:nearestneighbours}
         asd
+
+        \section{Comparing Results}
+        \label{sec:compare}
     \end{multicols*}
     \newpage
     \begin{thebibliography}{9}
