@@ -88,10 +88,8 @@ commentstyle = \color{red}\ttfamily
         \label{sec:introduction}
         StyleGAN and COCO-GAN generate images using different techniques to accomplish two different goals: StyleGAN is designed such that high level features of the output image can be finely tuned and adjusted (e.g. lighting, hair colour, etc.)\cite{stylegan}.
         On the other hand, COCO-GAN generates each part of the image separately before stitching it together in order to simulate the human perception of vision\cite{cocogan}.
-        As a result, we expected each model to generate images with different qualities that relate to their designed tasks.\\\\
-        Although we tried to analyze the models using all the metrics listed in the Abstract, there were a few challenges involved with getting the desired results.
-
-        \section{Analysis Dataset Generation}
+        As a result, we expected each model to generate images with different qualities that relate to their designed tasks.
+        \section{Dataset Generation}
         \label{sec:dataset}
         Both GAN models were trained on the LSUN Bedroom dataset\cite{lsunBedroom} at a resolution of $256 \times 256$.
         Due to time constraints, we used pre-trained models to generate images for our analysis.
@@ -105,14 +103,10 @@ commentstyle = \color{red}\ttfamily
 
         \subsection{COCO-GAN}
         \label{subsec:cocoganGeneration}
-        \begin{verbatim}
-placeholder spacer
+        \begin{verbatim}placeholder spacer
 blah
 blah
-blah
-blah
-\end{verbatim}
-
+blah \end{verbatim}
         \section{Quantitative Analysis}
         \label{sec:quantitative}
         \subsection{C2ST}
@@ -128,9 +122,10 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \textbf{Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2}.
         Argmax is taken across output of linear units for classification.
         \\\\
-        To avoid introducing bias, all three datasets (training, validation, test) were equally balanced with real and generated images.
-        The 5000 generated images were further divided in half between images from StyleGAN and COCO-GAN.
+        To avoid introducing bias, all three datasets (training, validation, test) were equally balanced with real and generated images (5000 each).
+        The generated images were further divided in half between images from StyleGAN and COCO-GAN.
         Out of the combined pool of 10000 images, 5000 were allocated for training, 2500 validation, and 2500 testing.
+        \\\\
         The model was trained with a batch size of 200 for 1000 epoches.
         After tuning hyper parameters and performing early stopping with the validation dataset, the following results were attained:
         \\
@@ -155,10 +150,10 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \\\\
         The model was able to correctly identify the origin of an image the majority of the time.
         This data suggests that StyleGAN is better at tricking the classifier than COCO-GAN.
+        \\\\
         To confirm this, we trained additional classifiers using the same architecture, data set distribution, and hyper-parameters but only using images from one of the GAN models.
-        (i.e. all 5000 generated images are all from one model)
+        (i.e. all 5000 generated images are all from one GAN model)
         The goal is to test how well the classifier performs when isolated to a specific GAN.
-        \\
 
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
              \hline
@@ -194,7 +189,7 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \end{tabular}
         \\\\
         As seen here, the Real vs COCO-GAN classifier (Table 3) performed significantly better than the Real vs StyleGAN classifier (Table 2).
-        This supports the hypothesis that StyleGAN mimics the real dataset than COCO-GAN.
+        This supports the hypothesis that StyleGAN mimics real images better than COCO-GAN.
         \subsection{Image Quality}
         \label{subsec:imageQuality}
         asd
