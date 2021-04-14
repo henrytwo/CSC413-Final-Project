@@ -80,8 +80,8 @@ commentstyle = \color{red}\ttfamily
         A Generative Adversarial Network (GAN) uses an adversarial process between two models which are simultaneously trained to estimate a generative model.\cite{gan}
         There are many variants of GAN architectures, such as COCO-GAN\cite{cocogan} and StyleGAN\cite{stylegan}, which both have the ability to generate synthetic images which mimic real images.\\\\
         We are exploring methods of comparing the quantitative performance of these architectures with their interpretability.
-        Our quantitative measures include C2ST\cite{evaluateGANs}, image quality measures\cite{evaluateGANs}, Maximum Mean Discrepancy (MMD)\cite{evaluateGANs}, etc.\\\\
-        In order to analyze these networks qualitatively, we will use methods such as SmoothGrad\cite{smoothgrad}, Latent Space Exploration\cite{sampleGAN} and nearest neighbour tests\cite{evaluateGANs} to decipher what the networks have learned.\\\\
+        Our quantitative measures include C2ST\cite{evaluateGANs}, image quality measures\cite{evaluateGANs}, etc.\\\\
+        In order to analyze these networks qualitatively, we will use methods such as Latent Space Exploration\cite{sampleGAN} and nearest neighbour tests\cite{evaluateGANs} to decipher what the networks have learned.\\\\
         By combining these two forms of analysis, we hope to gain insight into the relationship between performance metrics and the generated output of the models.
 
         \section{Introduction}
@@ -100,7 +100,7 @@ commentstyle = \color{red}\ttfamily
         NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used to generate 5000 images for analysis.
         5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{512}$ drawn from a standard normal distribution which each correspond to an output image.
 
-
+        \newpage
         \subsection{COCO-GAN}
         \label{subsec:cocoganGeneration}
         \begin{verbatim}placeholder spacer
@@ -117,7 +117,7 @@ blah \end{verbatim}
 with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         The goal is to compare the margin by which each GAN model is able to trick the classifier to quantify image generation quality.
         \\\\
-        The classifier was implemented with Cross Entropy loss, the Adam optimizer ($\alpha=0.1$), and the following network architecture:\\
+        The classifier was implemented in Pytorch with CE loss, the Adam optimizer ($\alpha=0.1$), and the following network architecture:\\
         \includegraphics[scale=0.35]{c2st-diagram.png}\\
         \textbf{Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2}.
         Argmax is taken across output of linear units for classification.
@@ -220,11 +220,7 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
 
         \bibitem{evaluateGANs}
         Brownlee, Jason. (2019)
-        \href{https://machinelearningmastery.com/how-to-evaluate-generative-adversarial-networks/}{\textit{How to Evaluate Generative Adversarial Networks.} }
-
-        \bibitem{smoothgrad}
-        Daniel Smilkov, Nikhil Thorat, Been Kim, Fernanda Viegas, Martin Wattenberg. (2017)
-        \href{https://arxiv.org/pdf/1706.03825.pdf}{\textit{SmoothGrad: removing noise by adding noise} }
+        \href{https://machinelearningmastery.com/how-to-evaluate-generative-adversarial-networks/}{\textit{How to
 
         \bibitem{sampleGAN}
         Tom White. (2016)
