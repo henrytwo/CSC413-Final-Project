@@ -125,8 +125,8 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \\\\
         The classifier was implemented with Cross Entropy loss, the Adam optimizer ($\alpha=0.1$), and the following network architecture:\\
         \includegraphics[scale=0.35]{c2st-diagram.png}\\
-        Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2.
-        Argmax is taken across the output of the linear units for classification.
+        \textbf{Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2}.
+        Argmax is taken across output of linear units for classification.
         \\\\
         To avoid introducing bias, all three datasets (training, validation, test) were equally balanced with real and generated images.
         The 5000 generated images were further divided in half between images from StyleGAN and COCO-GAN.
