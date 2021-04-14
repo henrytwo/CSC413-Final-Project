@@ -112,8 +112,9 @@ commentstyle = \color{red}\ttfamily
         \label{subsec:c2st}
         Classifier Two-Sample Tests (C2ST) is used to predict if two samples came from the same distribution\cite{c2st}.
         In the context of evaluating GANs, we will use C2ST to quantitatively measure how well the models mimic real images.
-        We trained a deep convolutional neural network to perform binary classification.
-        The idea is to compare the margin by which each GAN model is able to trick the classifier to determine how realistic the image is.
+        We trained a deep convolutional neural network to perform binary classification based on the recommended discriminator architecture from \textit{Unsupervised Representation Learning
+with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
+        The goal is to compare the margin by which each GAN model is able to trick the classifier as a measure of image generation quality.
         \\\\
         To avoid introducing bias, all three datasets (training, validation, test) were equally balanced in real and fake images.
         The 5000 fake images were further divided in half between images from StyleGAN and COCO-GAN .
@@ -124,11 +125,11 @@ commentstyle = \color{red}\ttfamily
 test
 \end{verbatim}
         After tuning hyper parameters and performing early stopping with the validation dataset, the following accuracies were attained:
-        \begin{verbatim}Training Accuracy: 74% of 5000
-Validation Accuracy: 64% of 2500
-Test Accuracy (Real): 39% of 1250
-Test Accuracy (StyleGAN): 48% of 625
-Test Accuracy (COCO-GAN): 39% of 625\end{verbatim}
+        \begin{verbatim}Training Accuracy: 82.1% of 5000
+Validation Accuracy: 66.8% of 2500
+Test Accuracy (Real): 58.4% of 1250
+Test Accuracy (StyleGAN): 62.4% of 625
+Test Accuracy (COCO-GAN): 86.4% of 625\end{verbatim}
         As seen here, the model failed to accurately discriminate between the real and generated images.
         This suggests that either the generated images are so good that it can't be distinguished from the real images, or the classifier is ineffective.
 
@@ -187,6 +188,10 @@ Test Accuracy (COCO-GAN): 39% of 625\end{verbatim}
         \bibitem{c2st}
         David Lopez-Paz, Maxime Oquab. (2016)
         \href{https://research.fb.com/wp-content/uploads/2017/04/neural_tests.pdf?}{\textit{Revisiting Classifier Two-Sample Tests for GAN Evaluation and Causal Discovery}}
+
+        \bibitem{dcgan}
+        Alec Radford, Luke Metz, Soumith Chintala. (2015)
+        \href{https://arxiv.org/pdf/1511.06434.pdf}{\textit{Unsupervised Representation Learning with Deep Convolutional Generative Adversarial Networks}}
 
     \end{thebibliography}
 
