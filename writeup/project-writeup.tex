@@ -1,10 +1,10 @@
-\documentclass[12pt]{article}
+\documentclass[10pt]{article}
 \usepackage{listings}
 \usepackage{setspace}
 \usepackage{multicol}
 \usepackage{enumitem}
 \usepackage{amsmath,amsthm,amssymb}
-\usepackage[margin=2.5cm, left=1cm, right=1cm, top=2cm, bottom=1.8cm]{geometry}
+\usepackage[margin=2.5cm, left=1cm, right=1cm, top=1.8cm, bottom=1.8cm,headsep=0.5cm]{geometry}
 \usepackage{mathtools}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -70,7 +70,6 @@ commentstyle = \color{red}\ttfamily
         University of Toronto
     \end{minipage}
     \\
-
     \begin{multicols*}{2}
         \raggedcolumns
 
@@ -97,13 +96,13 @@ commentstyle = \color{red}\ttfamily
         \label{sec:datasetGeneration}
         \subsection{StyleGAN}
         \label{subsec:styleganGeneration}
-        NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used to generate 5000 images for analysis.
+        NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used to generate images for analysis.
         5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{512}$ drawn from a standard normal distribution which each correspond to an output image.
 
         \subsection{COCO-GAN}
         \label{subsec:cocoganGeneration}
-        The TensorFlow implementation of COCO-GAN by its authors pretrained to the LSUN Bedroom dataset\cite{cocogan} was used to generate 5000 images for analysis.
-        5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{128}$ were drawn from a uniform $[-1, 1]$ distribution which each correspond to an output image.
+        The TensorFlow implementation of COCO-GAN by its authors pretrained to the LSUN Bedroom dataset\cite{cocogan} was used to generate images for analysis.
+        5000 latent code vectors $\mathbf{z} \in [-1, 1]^{128}$ were drawn from a uniform distribution which each correspond to an output image.
 
         \section{Quantitative Analysis}
         \label{sec:quantitative}
@@ -115,18 +114,18 @@ commentstyle = \color{red}\ttfamily
 with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         The goal is to compare the margin by which each GAN model is able to trick the classifier to quantify image generation quality.
         \\\\
-        The classifier was implemented in Pytorch with CE loss, the Adam optimizer ($\alpha=0.1$), and the following network architecture:\\\\
-        \includegraphics[scale=0.35]{c2st-diagram.png}\\
+        The classifier was implemented in Pytorch with CE loss, the Adam optimizer ($\alpha=0.1$), and the following network architecture (\# of channels per layer specified in diagram):
+
+        \includegraphics[scale=0.4]{c2st-diagram.png}\\
         For all Conv2D layers, \textbf{Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2}.
         Argmax is taken across output of linear units for classification.
-        \\\\
+
         To avoid introducing bias, all three datasets (training, validation, test) were equally balanced with real and generated images (5000 each).
         The generated images were further divided in half between images from StyleGAN and COCO-GAN.
         Out of the combined pool of 10000 images, 5000 were allocated for training, 2500 validation, and 2500 testing.
         \\\\
         The model was trained with a batch size of 200 for 1000 epoches.
-        After tuning hyper parameters and performing early stopping with the validation dataset, the following results were attained:
-        \\
+        After tuning hyper parameters and performing early stopping with the validation dataset, the following results were attained:\\
 
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
          \hline
@@ -151,7 +150,8 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \\\\
         To confirm this, we trained additional classifiers using the same architecture, data set distribution, and hyper-parameters but only using images from one of the GAN models.
         (i.e. all 5000 generated images are all from one GAN model)
-        The goal is to test how well the classifier performs when isolated to a specific GAN.\\\\
+        The goal is to test how well the classifier performs when isolated to a specific GAN.\\
+
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
              \hline
              \multicolumn{2}{|c|}{Table 2: Real vs StyleGAN} \\
@@ -166,7 +166,8 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
              \hline
             Test (StyleGAN) & 61.4\% of 1250  \\
              \hline
-        \end{tabular}\\
+        \end{tabular}
+
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
              \hline
              \multicolumn{2}{|c|}{Table 3: Real vs COCO-GAN} \\
@@ -184,7 +185,8 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \end{tabular}
         \\\\
         As seen here, the Real vs COCO-GAN classifier (Table 3) performed significantly better than the Real vs StyleGAN classifier (Table 2).
-        This supports the hypothesis that StyleGAN mimics real images better than COCO-GAN.\\\\
+        This supports the hypothesis that StyleGAN mimics real images better than COCO-GAN.
+
         Although these results suggest it is more difficult for a classifier to identify a StyleGAN generated image, it by no means shows that it is impossible to train a more accurate classifier.
         Therefore, we must put the information gathered in the context of the other metrics in order to draw a stronger conclusion.
 
@@ -193,16 +195,20 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         A common indicator of image quality is sharpness.
         When an image is sharp, the details within the image are seen more clearly and there is a better distinction between different objects in the picture.
         Overall, this allows humans to form a better understanding of what they are seeing when they view the image.
-        Using directional image gradients along the $x$ and $y$ axes, we measured the mean image sharpness of the generated images and real images as seen below. (Higher is better)
-        \\
-        \begin{table}[h]
-        \centering
-        \begin{tabular}{cccc}
-                 & Real & StyleGAN & COCO-GAN  \\ \hline \\
-        Sharpness & 8.534    & 8.214      & 7.970     \\ \\ \hline \\
+        Using directional image gradients along the $x$ and $y$ axes, we measured the mean image sharpness of the generated images and real images as seen below. (Higher is better)\\
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Comment: Should also mention how many images were used in this analysis
+        \begin{tabular}{ |p{2cm}|p{2cm}|p{2cm}|p{2cm}|  }
+             \hline
+             \multicolumn{4}{|c|}{Table 4: Mean Image Sharpness} \\
+             \hline
+            & Real & StyleGAN & COCO-GAN  \\
+            \hline
+            Sharpness & 8.534    & 8.214      & 7.970\\
+            \hline
         \end{tabular}
-        \end{table}
-        \\
+        \\\\
         Therefore the real images are the sharpest and StyleGAN does the better job of producing sharper images than COCO-GAN.
         However, does higher sharpness always mean better image quality?
         We explore this question in the combined analysis section below.
@@ -216,16 +222,24 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \\\\
         \textbf{Insert images}
         \\\\
-        As seen in the frequency plots, both StyleGAN and COCO-GAN do a good job of modelling the real distribution of colors. However, both generated image frequency plots show many spikes that are not present in the real image frequency plots. We will explore these spikes in our combined analysis section. Additionally, to quantify this color reproduction quality, we also took the KL Divergence between the color distributions of each model to the real images. \\
-        \begin{table}[h]
-        \centering
-        \begin{tabular}{lllll}
-                 & Red & Green & Blue & Gray \\ \hline \\
-        StyleGAN & 0.286    & 0.263      & 0.232     &  0.251    \\ \\ \hline \\
-        COCO-GAN  & 0.044    & 0.047      & 0.059     &  0.016
+        As seen in the frequency plots, both StyleGAN and COCO-GAN do a good job of modelling the real distribution of colors.
+        However, both generated image frequency plots show many spikes that are not present in the real image frequency plots.
+        We will explore these spikes in our combined analysis section. Additionally, to quantify this color reproduction quality, we also took the KL Divergence between the color distributions of each model to the real images.\\
+
+        %%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Comment: Should also mention how many images were used in this analysis
+        \begin{tabular}{ |p{2cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}|  }
+             \hline
+             \multicolumn{5}{|c|}{Table 5: KL Divergence of color channels w/ Real Imgs} \\
+             \hline
+            & Red & Green & Blue & Gray  \\
+            \hline
+            StyleGAN & 0.286    & 0.263      & 0.232     &  0.251 \\
+            \hline
+            COCO-GAN  & 0.044    & 0.047      & 0.059     &  0.016\\
+            \hline
         \end{tabular}
-        \end{table}
-        \\
+        \\\\
         Therefore COCO-GAN does a statistically better job of modelling the color distribution of the real images. Note that this does not guarantee that COCO-GAN is superior because this method of comparison does not take into account the spatial position of the colors. This means that the images would post the same KL Divergence even if the pixels were scrambled. Therefore further analysis is needed to determine which model performs better overall.
 
 
