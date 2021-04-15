@@ -100,16 +100,11 @@ commentstyle = \color{red}\ttfamily
         NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used to generate 5000 images for analysis.
         5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{512}$ drawn from a standard normal distribution which each correspond to an output image.
 
-
         \subsection{COCO-GAN}
         \label{subsec:cocoganGeneration}
-        \begin{verbatim}placeholder spacer
-blah
-blah
-blah
-blah
-blah
-blah \end{verbatim}
+        The TensorFlow implementation of COCO-GAN by its authors pretrained to the LSUN Bedroom dataset\cite{cocogan} was used to generate 5000 images for analysis.
+        5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{69}$ were drawn from a uniform $[-1, 1]$ distribution which each correspond to an output image.
+
         \section{Quantitative Analysis}
         \label{sec:quantitative}
         \subsection{C2ST}
@@ -120,9 +115,9 @@ blah \end{verbatim}
 with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         The goal is to compare the margin by which each GAN model is able to trick the classifier to quantify image generation quality.
         \\\\
-        The classifier was implemented in Pytorch with CE loss, the Adam optimizer ($\alpha=0.1$), and the following network architecture:\\
+        The classifier was implemented in Pytorch with CE loss, the Adam optimizer ($\alpha=0.1$), and the following network architecture:\\\\
         \includegraphics[scale=0.35]{c2st-diagram.png}\\
-        \textbf{Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2}.
+        For all Conv2D layers, \textbf{Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2}.
         Argmax is taken across output of linear units for classification.
         \\\\
         To avoid introducing bias, all three datasets (training, validation, test) were equally balanced with real and generated images (5000 each).
@@ -156,7 +151,7 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \\\\
         To confirm this, we trained additional classifiers using the same architecture, data set distribution, and hyper-parameters but only using images from one of the GAN models.
         (i.e. all 5000 generated images are all from one GAN model)
-        The goal is to test how well the classifier performs when isolated to a specific GAN.
+        The goal is to test how well the classifier performs when isolated to a specific GAN.\\\\
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
              \hline
              \multicolumn{2}{|c|}{Table 2: Real vs StyleGAN} \\
@@ -195,25 +190,110 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
 
         \subsection{Image Sharpness}
         \label{subsec:imageSharpness}
-        asd
+        A common indicator of image quality is sharpness.
+        When an image is sharp, the details within the image are seen more clearly and there is a better distinction between different objects in the picture.
+        Overall, this allows humans to form a better understanding of what they are seeing when they view the image.
+        Using directional image gradients along the $x$ and $y$ axes, we measured the mean image sharpness of the generated images and real images as seen below. (Higher is better)
+        \\
+        \begin{table}[h]
+        \centering
+        \begin{tabular}{cccc}
+                 & Real & StyleGAN & CocoGAN  \\ \hline \\
+        Sharpness & 8.534    & 8.214      & 7.970     \\ \\ \hline \\
+        \end{tabular}
+        \end{table}
+        \\
+        Therefore the real images are the sharpest and StyleGAN does the better job of producing sharper images than CocoGAN.
+        However, does higher sharpness always mean better image quality?
+        We explore this question in the combined analysis section below.
 
-        \subsection{Color Distribution}
-        \label{subsec:imageSharpness}
-        asd
+        \subsection{Color Distribution Comparison}
+        \label{subsec:colorDistribution}
+
+        The purpose of a GAN is to generate new images that match the distribution of the training images. Therefore, we decided to statistically compare the distribution of generated images with the distribution of real images in order to understand how well the GANs have fit to the training data.
+        \\\\
+        In order to properly mimic the real images, the generated images have to closely follow the color distribution of the real images. Each image in our data is represented by RGB values ranging between 0 and 1. We extracted the frequencies of RGB color values using 25 bins for each of the datasets. The distribution of these frequencies are plotted below for the real images and each set of generated data.
+        \\\\
+        \textbf{Insert images}
+        \\\\
+        As seen in the frequency plots, both StyleGAN and CocoGAN do a good job of modelling the real distribution of colors. However, both generated image frequency plots show many spikes that are not present in the real image frequency plots. We will explore these spikes in our combined analysis section. Additionally, to quantify this color reproduction quality, we also took the KL Divergence between the color distributions of each model to the real images. \\
+        \begin{table}[h]
+        \centering
+        \begin{tabular}{lllll}
+                 & Red & Green & Blue & Gray \\ \hline \\
+        StyleGAN & 0.286    & 0.263      & 0.232     &  0.251    \\ \\ \hline \\
+        CocoGAN  & 0.044    & 0.047      & 0.059     &  0.016
+        \end{tabular}
+        \end{table}
+        \\
+        Therefore CocoGAN does a statistically better job of modelling the color distribution of the real images. Note that this does not guarantee that CocoGAN is superior because this method of comparison does not take into account the spatial position of the colors. This means that the images would post the same KL Divergence even if the pixels were scrambled. Therefore further analysis is needed to determine which model performs better overall.
 
 
         \section{Qualitative Analysis}
         \label{sec:qualitative}
         \subsection{Latent Space Exploration}
         \label{subsec:latentSpaceExploration}
-        asd
+        An important part of the generator is it's ability to combine different features from the real image in order to generate new images.
+        For example, in our dataset, an image could contain a bed, a window or a painting. What about a combination of these?
+        What if the locations of these features is changed? We use latent space interpolation to determine if the model produces robust images in all of these cases.
+
         \subsection{Nearest Neighbours}
         \label{subsec:nearestneighbours}
-        asd
+        A common problem within GANs is mode collapse.
+        This occurs when the generator consistently outputs the same image for distinct latent vectors.
+        In addition to this, we want to identify if the generator creates multiple images with identical structure or color scheme.
+        To identify these issues, we randomly sampled generated images and visually compared them with the k nearest neighbours from the images produced by the same model.
+        In our search, we found no evidence of mode collapse in either StyleGAN or CocoGAN. Samples from the images used in this analysis are provided below.
 
-        \section{Comparing Results}
-        \label{sec:compare}
+        \section{Combined Analysis}
+        \label{sec:combinedAnalysis}
+        \subsection{Colour Frequency Peaks}
+        In our analysis of color frequency distributions above, we noticed that both StyleGAN and CocoGAN exhibited spikes in their frequency graphs.
+        One prominent spike occurs simultaneously in the green and blue channel at intensity level 0.6.
+        This occurs in both the StyleGAN and CocoGAN generated images.
+        Specifically, this spike happened in colors covered by the following gradient.
+        \\\\
+        \textbf{Insert Gradient}
+        \\\\
+        We decided to sample some of these colors and find generated images with color schemes closely matching said colors.
+        The images matching color $(0.3, 0.6, 0.6)$ can be seen below for both StyleGAN and CocoGAN.
+        \\\\
+        \textbf{Cocogan Image}\\
+        \textbf{Stylegan Image}
+        \\\\
+        For both models, we are seeing an increase in noise and distortion in the images.
+        This is especially true in the case of CocoGAN, for which every image displays noisy textures or bad structure.
+        What does this trend tell us about CocoGAN?
+        From the samples, we can see that many of these images have windows in them that display the sky.
+        CocoGAN has done a relatively poor job of displaying the sky and natural imagery in the background.
+        \\\\
+        Additionally in the CocoGAN images we can see that much of the color from the sky bleeds into other parts of the image.
+        These sky colors are very similar to the colors in the gradient we are studying.
+        Therefore we theorize that this spike in frequency occurs from CocoGAN being unable to properly generate images that include the sky.
+        %
+        %
+        %
+        %
+        %
+        \subsection{High Sharpness Images}
+        In our analysis of image sharpness, we found that StyleGAN produced sharper images than CocoGAN.
+        Neither model was able to produce images as sharp as the training data.
+        We want to qualitatively explore what higher sharpness means in the case of these models.
+        Below we have plotted the sharpest images produced by both models.
+        \\\\
+        INSERT IMAGES
+        \\\\
+        As we can see, the StyleGAN images are of high quality, but the CocoGAN images are consistently filled with noisy patterns.
+        Both sets consist of very sharp images, and therefore we have visualized the sharpness below in order to understand why there is such a large difference in quality.
+        \\\\
+        INSERT SHARPNESS IMAGES
+        \\\\
+        By comparing the sharpness plots to the images, we can see that the sharpness of the StyleGAN images comes from it's ability to effectively generate complex patterns.
+        However, the sharpness of the CocoGAN images comes from unwanted noise or messy patterns which are often out of place.
+        Therefore, even though both models produce images with a relatively similar sharpness, the sharper images produced by StyleGAN are vastly superior to those produced by CocoGAN.
+        In conclusion, the qualitative results indicate that the true quality of CocoGAN images may be lower than the numbers indicate.
     \end{multicols*}
+
     \newpage
     \begin{thebibliography}{9}
         \bibitem{gan}
