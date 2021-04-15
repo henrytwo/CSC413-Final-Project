@@ -4,7 +4,7 @@
 \usepackage{multicol}
 \usepackage{enumitem}
 \usepackage{amsmath,amsthm,amssymb}
-\usepackage[margin=2.5cm]{geometry}
+\usepackage[margin=2.5cm, left=1cm, right=1cm, top=2cm, bottom=1.8cm]{geometry}
 \usepackage{mathtools}
 \usepackage{graphicx}
 \usepackage{xcolor}
@@ -103,7 +103,7 @@ commentstyle = \color{red}\ttfamily
         \subsection{COCO-GAN}
         \label{subsec:cocoganGeneration}
         The TensorFlow implementation of COCO-GAN by its authors pretrained to the LSUN Bedroom dataset\cite{cocogan} was used to generate 5000 images for analysis.
-        5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{69}$ were drawn from a uniform $[-1, 1]$ distribution which each correspond to an output image.
+        5000 latent code vectors $\mathbf{z} \in \mathbb{R}^{128}$ were drawn from a uniform $[-1, 1]$ distribution which each correspond to an output image.
 
         \section{Quantitative Analysis}
         \label{sec:quantitative}
@@ -166,7 +166,7 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
              \hline
             Test (StyleGAN) & 61.4\% of 1250  \\
              \hline
-        \end{tabular}
+        \end{tabular}\\
         \begin{tabular}{ |p{4cm}|p{3cm}|  }
              \hline
              \multicolumn{2}{|c|}{Table 3: Real vs COCO-GAN} \\
@@ -198,12 +198,12 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \begin{table}[h]
         \centering
         \begin{tabular}{cccc}
-                 & Real & StyleGAN & CocoGAN  \\ \hline \\
+                 & Real & StyleGAN & COCO-GAN  \\ \hline \\
         Sharpness & 8.534    & 8.214      & 7.970     \\ \\ \hline \\
         \end{tabular}
         \end{table}
         \\
-        Therefore the real images are the sharpest and StyleGAN does the better job of producing sharper images than CocoGAN.
+        Therefore the real images are the sharpest and StyleGAN does the better job of producing sharper images than COCO-GAN.
         However, does higher sharpness always mean better image quality?
         We explore this question in the combined analysis section below.
 
@@ -216,17 +216,17 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         \\\\
         \textbf{Insert images}
         \\\\
-        As seen in the frequency plots, both StyleGAN and CocoGAN do a good job of modelling the real distribution of colors. However, both generated image frequency plots show many spikes that are not present in the real image frequency plots. We will explore these spikes in our combined analysis section. Additionally, to quantify this color reproduction quality, we also took the KL Divergence between the color distributions of each model to the real images. \\
+        As seen in the frequency plots, both StyleGAN and COCO-GAN do a good job of modelling the real distribution of colors. However, both generated image frequency plots show many spikes that are not present in the real image frequency plots. We will explore these spikes in our combined analysis section. Additionally, to quantify this color reproduction quality, we also took the KL Divergence between the color distributions of each model to the real images. \\
         \begin{table}[h]
         \centering
         \begin{tabular}{lllll}
                  & Red & Green & Blue & Gray \\ \hline \\
         StyleGAN & 0.286    & 0.263      & 0.232     &  0.251    \\ \\ \hline \\
-        CocoGAN  & 0.044    & 0.047      & 0.059     &  0.016
+        COCO-GAN  & 0.044    & 0.047      & 0.059     &  0.016
         \end{tabular}
         \end{table}
         \\
-        Therefore CocoGAN does a statistically better job of modelling the color distribution of the real images. Note that this does not guarantee that CocoGAN is superior because this method of comparison does not take into account the spatial position of the colors. This means that the images would post the same KL Divergence even if the pixels were scrambled. Therefore further analysis is needed to determine which model performs better overall.
+        Therefore COCO-GAN does a statistically better job of modelling the color distribution of the real images. Note that this does not guarantee that COCO-GAN is superior because this method of comparison does not take into account the spatial position of the colors. This means that the images would post the same KL Divergence even if the pixels were scrambled. Therefore further analysis is needed to determine which model performs better overall.
 
 
         \section{Qualitative Analysis}
@@ -243,55 +243,55 @@ with Deep Convolutional Generative Adversarial Networks}\cite{dcgan}.
         This occurs when the generator consistently outputs the same image for distinct latent vectors.
         In addition to this, we want to identify if the generator creates multiple images with identical structure or color scheme.
         To identify these issues, we randomly sampled generated images and visually compared them with the k nearest neighbours from the images produced by the same model.
-        In our search, we found no evidence of mode collapse in either StyleGAN or CocoGAN. Samples from the images used in this analysis are provided below.
+        In our search, we found no evidence of mode collapse in either StyleGAN or COCO-GAN. Samples from the images used in this analysis are provided below.
 
         \section{Combined Analysis}
         \label{sec:combinedAnalysis}
         \subsection{Colour Frequency Peaks}
-        In our analysis of color frequency distributions above, we noticed that both StyleGAN and CocoGAN exhibited spikes in their frequency graphs.
+        In our analysis of color frequency distributions above, we noticed that both StyleGAN and COCO-GAN exhibited spikes in their frequency graphs.
         One prominent spike occurs simultaneously in the green and blue channel at intensity level 0.6.
-        This occurs in both the StyleGAN and CocoGAN generated images.
+        This occurs in both the StyleGAN and COCO-GAN generated images.
         Specifically, this spike happened in colors covered by the following gradient.
         \\\\
         \textbf{Insert Gradient}
         \\\\
         We decided to sample some of these colors and find generated images with color schemes closely matching said colors.
-        The images matching color $(0.3, 0.6, 0.6)$ can be seen below for both StyleGAN and CocoGAN.
+        The images matching color $(0.3, 0.6, 0.6)$ can be seen below for both StyleGAN and COCO-GAN.
         \\\\
         \textbf{Cocogan Image}\\
         \textbf{Stylegan Image}
         \\\\
         For both models, we are seeing an increase in noise and distortion in the images.
-        This is especially true in the case of CocoGAN, for which every image displays noisy textures or bad structure.
-        What does this trend tell us about CocoGAN?
+        This is especially true in the case of COCO-GAN, for which every image displays noisy textures or bad structure.
+        What does this trend tell us about COCO-GAN?
         From the samples, we can see that many of these images have windows in them that display the sky.
-        CocoGAN has done a relatively poor job of displaying the sky and natural imagery in the background.
+        COCO-GAN has done a relatively poor job of displaying the sky and natural imagery in the background.
         \\\\
-        Additionally in the CocoGAN images we can see that much of the color from the sky bleeds into other parts of the image.
+        Additionally in the COCO-GAN images we can see that much of the color from the sky bleeds into other parts of the image.
         These sky colors are very similar to the colors in the gradient we are studying.
-        Therefore we theorize that this spike in frequency occurs from CocoGAN being unable to properly generate images that include the sky.
+        Therefore we theorize that this spike in frequency occurs from COCO-GAN being unable to properly generate images that include the sky.
         %
         %
         %
         %
         %
         \subsection{High Sharpness Images}
-        In our analysis of image sharpness, we found that StyleGAN produced sharper images than CocoGAN.
+        In our analysis of image sharpness, we found that StyleGAN produced sharper images than COCO-GAN.
         Neither model was able to produce images as sharp as the training data.
         We want to qualitatively explore what higher sharpness means in the case of these models.
         Below we have plotted the sharpest images produced by both models.
         \\\\
         INSERT IMAGES
         \\\\
-        As we can see, the StyleGAN images are of high quality, but the CocoGAN images are consistently filled with noisy patterns.
+        As we can see, the StyleGAN images are of high quality, but the COCO-GAN images are consistently filled with noisy patterns.
         Both sets consist of very sharp images, and therefore we have visualized the sharpness below in order to understand why there is such a large difference in quality.
         \\\\
         INSERT SHARPNESS IMAGES
         \\\\
         By comparing the sharpness plots to the images, we can see that the sharpness of the StyleGAN images comes from it's ability to effectively generate complex patterns.
-        However, the sharpness of the CocoGAN images comes from unwanted noise or messy patterns which are often out of place.
-        Therefore, even though both models produce images with a relatively similar sharpness, the sharper images produced by StyleGAN are vastly superior to those produced by CocoGAN.
-        In conclusion, the qualitative results indicate that the true quality of CocoGAN images may be lower than the numbers indicate.
+        However, the sharpness of the COCO-GAN images comes from unwanted noise or messy patterns which are often out of place.
+        Therefore, even though both models produce images with a relatively similar sharpness, the sharper images produced by StyleGAN are vastly superior to those produced by COCO-GAN.
+        In conclusion, the qualitative results indicate that the true quality of COCO-GAN images may be lower than the numbers indicate.
     \end{multicols*}
 
     \newpage
