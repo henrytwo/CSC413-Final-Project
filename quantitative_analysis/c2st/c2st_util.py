@@ -165,5 +165,5 @@ class ImageDataset(torch.utils.data.Dataset):
         return self.input_data.shape[3]
 
     def __getitem__(self, index):
-        return torch.tensor(self.input_data[index], requires_grad=self.requires_grad, device=self.device).float(), \
-               torch.tensor(self.output_data[index], requires_grad=self.requires_grad, device=self.device).long()
+        return torch.tensor(self.input_data[index], requires_grad=self.requires_grad, device=self.device, dtype=torch.float), \
+               torch.tensor(self.output_data[index], requires_grad=self.requires_grad, device=self.device, dtype=torch.float).long()
