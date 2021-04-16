@@ -11,11 +11,13 @@ C2ST SmoothGrad analysis
 
 import pickle
 import sys
+import ntpath
 
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
 from c2st_util import *
+import os
 
 if __name__ == '__main__':
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -27,7 +29,7 @@ if __name__ == '__main__':
     with open(sys.argv[2], 'rb') as file:
         print("Loading evaluation dataset")
         data = ImageDataset(pickle.load(file), device, requires_grad=True)
-        evaluation_dataloader = torch.utils.data.DataLoader(data, batch_size=100)
+        evaluation_dataloader = torch.utils.data.DataLoader(data, batch_size=150)
 
     # Setup classifier
     model = C2ST(data.get_shape()).to(device)
@@ -105,7 +107,8 @@ if __name__ == '__main__':
         correct_grad = np.swapaxes(correct_grad, 1, 3)
 
     # Kinda normalize it?
-    correct_grad = 255 * (correct_grad / np.max(correct_grad))
+    correct_grad = np.floor(255 * (correct_grad / np.max(correct_grad))).astype(np.uint8)
+    correct_image = np.floor(255 * correct_image).astype(np.uint8)
 
     img_subset = np.concatenate(
         [
@@ -121,5 +124,10 @@ if __name__ == '__main__':
         axis=0
     )
 
+    # Save plot
+    file_name, extension = os.path.splitext(ntpath.basename(sys.argv[2]))
+    plt.imsave('smoothgrad_out/' + file_name + '-smoothgrad.png', img_subset)
+
+    # Show preview
     plt.imshow(img_subset)
     plt.show()
