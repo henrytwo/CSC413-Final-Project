@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     criterion = torch.nn.CrossEntropyLoss()
 
-    NUM_SAMPLES = 100 # Number of times to take gradient
+    NUM_SAMPLES = 100  # Number of times to take gradient
 
     for batch_data, batch_labels in evaluation_dataloader:
         batch_data.retain_grad()
@@ -53,7 +53,7 @@ if __name__ == '__main__':
         # Run it a whole bunch of times
         for _ in range(NUM_SAMPLES):
             # TODO: Add noise from gaussian distribution
-            noise = torch.randn_like(batch_data, device=device, requires_grad=True)
+            noise = (0.1 ** 0.5) * torch.randn_like(batch_data, device=device, requires_grad=True)
 
             predictions = model.forward(batch_data + noise)
             loss = criterion(predictions, batch_labels)
@@ -75,7 +75,7 @@ if __name__ == '__main__':
                 noise_grads += current_noise_grad
             """
 
-        grad = batch_data.grad.cpu().numpy() #+ noise_grads
+        grad = batch_data.grad.cpu().numpy()  # + noise_grads
         image = batch_data.cpu().detach().numpy()
 
         for i in range(len(is_correct)):
