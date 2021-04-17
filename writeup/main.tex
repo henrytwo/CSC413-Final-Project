@@ -26,9 +26,11 @@
 \usepackage{nicefrac}       % compact symbols for 1/2, etc.
 \usepackage{microtype}      % microtypography
 
+\usepackage{hyperref}
 \usepackage{amsmath,amsthm,amssymb}
 \usepackage{graphicx}
 \usepackage{mathtools}
+\usepackage{diagbox}
 \usepackage{multicol}
 \usepackage{float}
 
@@ -110,101 +112,101 @@ urlcolor=cyan,
         Both GAN models were trained on the LSUN Bedroom dataset\cite{lsunBedroom} at a resolution of $256 \times 256$.
         Due to time constraints, we used pre-trained models to generate images for our analysis.
         \\\\
-        NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used with
-        5000 latent vectors $\mathbf{z} \in \mathbb{R}^{512} \sim \mathcal{N}(0, 1\mathbf{I})$, which each correspond to an output image.
-        The TensorFlow implementation of COCO-GAN by its authors pretrained to the LSUN Bedroom dataset\cite{cocogan} using
-        5000 latent vectors $\mathbf{z} \in [-1, 1]^{128} \sim \mathcal{U}[-1, 1]^{128}$, which each correspond to an output image. 
+        NVIDIA Research Projects' Official TensorFlow Implementation of StyleGAN pretrained to the LSUN Bedroom dataset\cite{styleGANCode} was used with latent vectors $\mathbf{z} \in \mathbb{R}^{512} \sim \mathcal{N}(0, 1\mathbf{I})$ to generate samples.
+        The TensorFlow implementation of COCO-GAN by its authors pretrained to the LSUN Bedroom dataset\cite{cocogan} was used with
+        latent vectors $\mathbf{z} \in [-1, 1]^{128} \sim \mathcal{U}[-1, 1]^{128}$ to generate samples. 
 
-
-        \section{Quantitative analysis}
-        \label{sec:quantitative}
-        \subsection{Classifier Two-Sample tests (C2ST)}
+        \section{Classifier Two-Sample Tests (C2ST)}
         \label{subsec:c2st}
-        C2ST is used to predict if two samples came from the same distribution\cite{c2st}.
+        C2ST uses a classifier to predict if two samples came from the same distribution\cite{c2st}.
         We trained a CNN to perform classification using a variation of the DCGAN discriminator\cite{dcgan}.
         The goal is to compare the difficulty in which the classifier has with distinguishing between real and generated samples.
         The classifier was trained using Cross Entropy loss and the Adam optimizer.
         \begin{figure}[!htb]
           \centering
-          \includegraphics[scale=0.3]{c2st-diagram.png}\\
-          \caption{ \textbf{C2ST architecture.} For all Conv2D layers, Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2. Let $\mathbf{f}: [0, 1]^{3 \times 256 \times 256} \rightarrow \mathbb{R}^{2}$ be the neural network. Let $GANImages, RealImages \in [0, 1]^{3 \times 256 \times 256}$ be the distribution of generated images and samples from the LSUN bedroom dataset respectively. For $\mathbf{x}_{real} \sim RealImages$ (Class 1) and $\mathbf{x}_{gan} \sim GANImages$ (Class 0), the predicted class $\hat{c} =argmax_c (\mathbf{f}(\mathbf{x})[c])$ is correct iff $\hat{c} = class(\mathbf{x})$.}
+          \includegraphics[scale=0.26]{c2st-diagram.png}\\
+          \caption{ \textbf{C2ST architecture.} For all Conv2D layers, Kernel Size: 3, Stride: 2, Padding: 1, Leaky ReLU slope: 0.2. Let $\mathbf{f}: [0, 1]^{3 \times 256 \times 256} \rightarrow \mathbb{R}^{2}$ be the neural network. For $\mathbf{x}_{real} \sim RealImages$ (Class 1) and $\mathbf{x}_{gan} \sim GANImages$ (Class 0), the predicted class $\hat{c} =argmax_c (\mathbf{f}(\mathbf{x})[c])$ is correct iff $\hat{c} = class(\mathbf{x})$.}
         \end{figure}
-        The training, validation, and test datasets were drawn from $\beta RealImages + (1 - \beta)GANImages, \beta \sim Bern(0.5)$.
-        Out of the pool of 10000 images, 5000 were allocated for training, 2500 validation, and 2500 testing.
-        Let $StyleGANImages, COCOGANImages$ be the distribution of StyleGAN and COCO-GAN generated images respectively. The model was trained with a batch size of 200 for 1000 epoches. Let $GANImages = \beta StyleGANImages + (1 - \beta) COCOGANImages, \beta \sim Bern(0.5)$.
-        After tuning hyper parameters and performing early stopping, the following results were attained:
+        Let $GANImages, RealImages \in [0, 1]^{3 \times 256 \times 256}$ be the distribution of samples from GAN model(s) and LSUN bedroom dataset respectively.
+        The training and validation datasets were randomly drawn from $\beta RealImages + (1 - \beta)GANImages, \beta \sim Bern(0.5)$. 
+        A separate data set of samples from the Real, StyleGAN, and COCO-GAN distributions were allocated for testing.
+        See Table 1 for details.
+        Three C2ST classifier models were trained with a batch size of 200 for 1000 epoches and early stopping using the validation data set.
+        Let $StyleGANImages, COCOGANImages$ be the distribution of StyleGAN and COCO-GAN generated images respectively. 
         
         \begin{figure}[H]
             \centering
-            \begin{tabular}{ |p{3cm}|p{2cm}|  }
+            \begin{tabular}{ |p{3cm}|p{2.5cm}|p{3cm}|p{3.5cm}|  }
                  \hline
-                 \multicolumn{2}{|c|}{Table 1: Real vs GAN classifier} \\
+                 \multicolumn{4}{|c|}{Table 1: C2ST classifier model accuracy comparison} \\
                  \hline
-                Data Set     & Accuracy\\
+               \backslashbox{Dataset}{Model}        & (1) Real vs GAN & (2) Real vs StyleGAN & (3) Real vs COCO-GAN\\
                  \hline
-                Training        & 75.9\% of 5000 \\
+                Training        & 75.9\% of 5000 & 77.6\% of 5000 & 87.9\% of 5000\\
                  \hline
-                Validation      & 67.6\% of 2500 \\
+                Validation      & 67.6\% of 2500  & 68.1\% of 2500 & 88.2\% of 2500\\
                  \hline
-                Test (Real)     & 58.2\% of 1250 \\
+                Test (Real)     & (a) 58.2\% of 1250 & (d) 74.6\% of 1250& (f) 96.4\% of 1250\\
                  \hline
-                Test (StyleGAN) & 60.5\% of 625  \\
+                Test (StyleGAN) & (b) 60.5\% of 625  & (e) 61.4\% of 1250& N/A\\
                  \hline
-                Test (COCO-GAN) & 89.6\% of 625 \\
+                Test (COCO-GAN) & (c) 89.6\% of 625 & N/A & (g) 76.1\% of 1250\\
                  \hline 
             \end{tabular}
         \end{figure}
         
-        This data suggests that StyleGAN is better at tricking the classifier than COCO-GAN.
-        To confirm this, we trained additional classifiers using images from only one of the GAN models. Let $GANImages = StyleGANImages, COCOGANImages$ respectively:
-
-        \begin{multicols}{2}
-            \begin{tabular}{ |p{3cm}|p{2cm}|  }
-                 \hline
-                 \multicolumn{2}{|c|}{Table 2: Real vs StyleGAN classifier} \\
-                 \hline
-                Data Set     & Accuracy\\
-                 \hline
-                Training        & 77.6\% of 5000 \\
-                 \hline
-                Validation      & 68.1\% of 2500 \\
-                 \hline
-                Test (Real)     & 74.6\% of 1250 \\
-                 \hline
-                Test (StyleGAN) & 61.4\% of 1250  \\
-                 \hline
-            \end{tabular}
+        Let $GANImages := [\beta StyleGANImages + (1 - \beta) COCOGANImages, \beta \sim Bern(0.5)], StyleGANImages, COCOGANImages$ for Models 1, 2, and 3 respectively.
+        Data from Model 1 (trained + tested on both GAN datasets) suggests that samples from COCO-GAN are easier to identify than samples from StyleGAN.
+        To confirm this, we trained Models 2 and 3 using samples from only one of the GAN models. As seen here, Model 3 performed significantly better than the Model 2.
+        We must do additional analysis to interpret and ensure the classifier is making decisions off of the image quality and not external factors.
+        Note that it may be possible to train a classifier that performs better than the one we used for our analysis, which can effect the results.
+        \\\\
+        We can use SmoothGrad to generate a sensitivity map to visually discover which parts of the image most strongly affects the classification \cite{smoothgrad}.
+        Let $\mathbf{x} \in [0, 1]^{3 \times 256 \times 256}$ be the input image, $\mathcal{L}$ be CE loss, and $\nabla_{\mathbf{x}}^{*} \mathcal{L} (\mathbf{x})$ be the sensitivity map. $\nabla_{\mathbf{x}}^{*} \mathcal{L} (\mathbf{x}) = \frac{1}{100} \sum_{i=1}^{100} \nabla_{\mathbf{x}} \mathcal{L} (\mathbf{x} + \mathcal{N}(0, 0.1^2\mathbf{I}))$. 
+        Additional sensitivity map samples are available in the appendix.
         
-            \begin{tabular}{ |p{3cm}|p{2cm}|  }
-                 \hline
-                 \multicolumn{2}{|c|}{Table 3: Real vs COCO-GAN classifier} \\
-                 \hline
-                Data Set     & Accuracy\\
-                 \hline
-                Training        & 87.9\% of 5000 \\
-                 \hline
-                Validation      & 88.2\% of 2500 \\
-                 \hline
-                Test (Real)     & 96.4\% of 1250 \\
-                 \hline
-                Test (COCO-GAN) & 76.1\% of 1250 \\
-                 \hline
-            \end{tabular}
-        \end{multicols}
-            
-        As seen here, the Real vs COCO-GAN classifier (Table 3) performed significantly better than the Real vs StyleGAN classifier (Table 2).
-        \subsection{Image sharpness}
+        \begin{figure}[H]
+          \centering
+          (a)
+          \includegraphics[scale=0.24]{smoothgrad/combined/real.png}
+          (b)
+          \includegraphics[scale=0.24]{smoothgrad/combined/stylegan.png}
+          (c)
+          \includegraphics[scale=0.24]{smoothgrad/combined/coco.png}
+          \caption{\textbf{Real vs GAN classifier sensitivity map. (a: real, b: StyleGAN, c: COCO-GAN)} Evidently, there is a clear checkerboard pattern, which could be caused by COCO-GAN's tile generation\cite{cocogan}. 
+        We can use the classifiers trained on only one GAN to validate this theory.}
+        \end{figure}
+        \begin{figure}[H]
+          \centering
+            (d)
+            \includegraphics[scale=0.24]{smoothgrad/stylegan/real.png}
+            (e)
+            \includegraphics[scale=0.24]{smoothgrad/stylegan/stylegan.png}
+            (f)
+            \includegraphics[scale=0.24]{smoothgrad/coco/real.png}
+            (g)
+            \includegraphics[scale=0.24]{smoothgrad/coco/coco.png}
+          \caption{\textbf{Real vs StyleGAN $\{d, e\}$ \& Real vs COCO-GAN $\{f, g\}$ classifier sensitivity map.} $\{d, f\}$ are real images, $\{e\}$ is from StyleGAN, and $\{g\}$ is from COCO-GAN. As seen in images $\{f, g\}$, the Real vs COCO-GAN classifier uses a checkerboard filter, which is quite effective with an overall test accuracy of $\frac{76.1\% + 96.4\%}{2} = 86.3\%$ (Table 1, Col 3). 
+          On the other hand, the StyleGAN classifier (images $\{d, e\}$) is very uniform and shows fewer patterns/artifacts.
+        This seems to suggest there are irregularities in between tiles generated by COCO-GAN which are easily detected by the classifier.
+        Therefore according to C2ST, StyleGAN produces more realistic images than COCO-GAN.}
+        \end{figure}
+        
+        Notice that in (d), there white bars that are a tell tale sign of a real image. Since they are a minority, they should not affect the results significantly.
+        Another interesting thing to note is that sensitivity maps for real images are mostly purple, whereas they are green for generated images.
+        
+        \section{Image sharpness}
         \label{subsec:imageSharpness}
         A common indicator of image quality is sharpness.
         When an image is sharp, the details within the image are seen more clearly and there is a better distinction between different objects in the picture.
         Overall, this allows humans to form a better understanding of what they are seeing when they view the image.
-        Using directional image gradients along the $x$ and $y$ axes, we measured the mean image sharpness of the generated images and real images as seen below. (Higher is better)
+        Using directional image gradients along the $x$ and $y$ axes, we measured the mean image sharpness on a sample of 1024 images from each dataset. (Higher is better)
         
         \begin{figure}[H]
             \centering
             \begin{tabular}{ |p{2cm}|p{2cm}|p{2cm}|p{2cm}|  }
                  \hline
-                 \multicolumn{4}{|c|}{Table 4: Mean image sharpness} \\
+                 \multicolumn{4}{|c|}{Table 2: Mean image sharpness} \\
                  \hline
                 & Real & StyleGAN & COCO-GAN  \\
                 \hline
@@ -214,12 +216,26 @@ urlcolor=cyan,
         \end{figure}
         
         Therefore the real images are the sharpest and StyleGAN does the better job of producing sharper images than COCO-GAN.
-        However, does higher sharpness always mean better image quality?
-        We explore this question in the combined analysis section below.
+        However, does higher sharpness always mean better image quality? To qualitatively explore this higher sharpness, we plotted the sharpest images from both models.
+         %
+        \begin{figure}[H]
+          \centering
+          \includegraphics[scale=0.25]{sharpness-images/stylegan_sharpness.png} 
+          \ \ 
+          \includegraphics[scale=0.25]{sharpness-images/coco_sharpness.png}
+          \caption{\textbf{Sharpest StyleGAN images vs sharpest COCO-GAN images.} As we can see, the StyleGAN images are of high quality, but the COCO-GAN images are consistently filled with noisy patterns.
+            Both sets consist of very sharp images, and therefore we have visualized the sharpness of these images below in order to understand why there is such a large difference in quality.\\}   
+        \end{figure} 
+        \begin{figure}[H]
+          \centering
+          \includegraphics[scale=0.25]{sharpness-images/stylegan_sharpness_lines.png}  
+          \includegraphics[scale=0.25]{sharpness-images/coco_sharpness_lines.png}
+          \caption{\textbf{StyleGAN vs COCO-GAN sharpness visualizations.} We can see that the sharpness of StyleGAN comes from effectively generating complex patterns while the sharpness of COCO-GAN comes from unwanted noise and messy patterns. Therefore, the qualitative analysis indicates that the quality of COCO-GAN images is lower than sharpness numbers indicate.}
+        \end{figure} 
 
-        \subsection{Color distribution comparison}
+        \section{Color distribution comparison}
         \label{subsec:colorDistribution}
-        In order to properly mimic the real images, the generated images have to closely follow the color distribution of the real images. Each image is represented by RGB values between 0 and 1. We extracted the frequencies of RGB color values using 25 bins for each of the datasets. The distributions of these frequencies are plotted in the appendix for the real and generated images. 
+        In order to properly mimic the real images, the generated images have to closely follow the color distribution of the real images. Each image is represented by RGB values between 0 and 1. We extracted the frequencies of RGB color values using 25 bins for 1024 images from each dataset. The distributions of these frequencies are plotted in the appendix for the real and generated images. 
         %\\ \\
         % \\
         % \includegraphics[scale =0.3]{color-distributions/real_color_freq.png} \\
@@ -227,14 +243,13 @@ urlcolor=cyan,
         % \includegraphics[scale =0.3]{color-distributions/cocogan_color_freq.png} \\
         % \\
         From the frequency plots, we see that both models do a good job of matching the real distribution of colors.
-        However, both generated image color frequency plots show many spikes that are not present in the real image frequency plot.
-        We will explore these spikes in our combined analysis section. Additionally, to quantify this color reproduction quality, we also took the KL Divergence between the generated image color distributions to the real images.
+        However, both generated image color frequency plots show many spikes that are not present in the real image frequency plot. Additionally, to quantify this color reproduction quality, we also took the KL Divergence between the generated image color distributions to the real images.
         
         \begin{figure}[H]
             \centering
             \begin{tabular}{ |p{2cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}|  }
                  \hline
-                 \multicolumn{5}{|c|}{Table 5: KL divergence of color channels w/ real imgs} \\
+                 \multicolumn{5}{|c|}{Table 3: KL divergence of color channels w/ real imgs} \\
                  \hline
                 & Red & Green & Blue & Gray  \\
                 \hline
@@ -246,25 +261,9 @@ urlcolor=cyan,
         \end{figure}
         
         Therefore COCO-GAN does a statistically better job of modelling the color distribution of the real images. Note that this does not guarantee that COCO-GAN is superior because this method of comparison does not take into account the spatial position of the colors. This means that the images would post the same KL Divergence even if the pixels were scrambled. Therefore further analysis is needed to determine which model performs better overall.
-        \section{Qualitative analysis}
-        \label{sec:qualitative}
-        % \subsection{Latent space exploration}
-        % \label{subsec:latentSpaceExploration}
-        % An important part of the generator is it's ability to combine different features from the real image in order to generate new images.
-        % For example, in our dataset, an image could contain a bed, a window or a painting. What about a combination of these?
-        % What if the locations of these features is changed? We use latent space interpolation to determine if the model produces robust images in all of these cases.
-        \subsection{Nearest neighbours}
-        \label{subsec:nearestneighbours}
-        A common problem within GANs is mode collapse.
-        This occurs when the generator consistently outputs the same image for distinct latent vectors.
-        In addition to this, we want to identify if the generator creates multiple images with identical structure or color scheme.
-        To identify these issues, we randomly sampled generated images and visually compared them with the k nearest neighbours from the images produced by the same model.
-        In our search, we found no evidence of mode collapse in either StyleGAN or COCO-GAN. View the appendix for samples used in the analysis.
-        \section{Combined analysis}
-        \label{sec:combinedAnalysis}
-        
-        \subsection{Colour frequency peaks}
-        In our analysis of color frequency distributions above, we noticed that both StyleGAN and COCO-GAN exhibited spikes in their frequency graphs.
+        \\
+        \\
+         In our analysis of color frequency distributions above, we noticed that both StyleGAN and COCO-GAN exhibited spikes in their frequency graphs.
         For both models, one prominent spike occurs simultaneously in the green and blue channel at intensity level 0.6.
         % %
         % \\\begin{figure}[!htb]
@@ -278,9 +277,9 @@ urlcolor=cyan,
         
         \begin{figure}[H]
           \centering
-          \includegraphics[scale=0.28]{color-images/03_06_06_stylegan_images.png} 
-          \includegraphics[scale=0.28]{color-images/03_06_06_coco_images.png}
-          \caption{\textbf{RGB (0.3,0.6,0.6) StyleGAN images vs CocoGAN images.}
+          \includegraphics[scale=0.25]{color-images/03_06_06_stylegan_images.png} 
+          \includegraphics[scale=0.25]{color-images/03_06_06_coco_images.png}
+          \caption{\textbf{RGB (0.3,0.6,0.6) StyleGAN images vs COCO-GAN images.}
             For both models, we are seeing an increase in noise and distortion in the images.
             Especially COCO-GAN,  which displays noisy textures or bad structure in every image.
             What does this trend tell us about COCO-GAN?
@@ -290,58 +289,26 @@ urlcolor=cyan,
             Therefore we theorize that this spike in frequency occurs from COCO-GAN's inability to generate good images that include the sky.
         }
         \end{figure}
+          \section{Nearest neighbours}
+        \label{subsec:nearestneighbours}
+        A common problem within GANs is mode collapse.
+        This occurs when the generator consistently outputs the same image for distinct latent vectors.
+        In addition to this, we want to identify if the generator creates multiple images with identical structure or color scheme.
+        To identify these issues, we randomly sampled generated images and visually compared them with the euclidean $k$ nearest neighbours from the images produced by the same model. This was done on a sample of 1024 images for each dataset.
+        In our search, we found no evidence of mode collapse in either StyleGAN or COCO-GAN. View the appendix for samples used in the analysis.
         
-        \subsection{High sharpness images}
-        In our image sharpness analysis, we found that StyleGAN produced sharper images than COCO-GAN.
-        To qualitatively explore this higher sharpness, we plotted the sharpest images from both models.
-         %
-        \begin{figure}[H]
-          \centering
-          \includegraphics[scale=0.25]{sharpness-images/stylegan_sharpness.png} 
-          \ \ 
-          \includegraphics[scale=0.25]{sharpness-images/coco_sharpness.png}
-          \caption{\textbf{Sharpest StyleGAN images vs sharpest COCO-GAN images.} As we can see, the StyleGAN images are of high quality, but the COCO-GAN images are consistently filled with noisy patterns.
-            Both sets consist of very sharp images, and therefore we have visualized the sharpness of these images below in order to understand why there is such a large difference in quality.\\}
-        \includegraphics[scale=0.25]{sharpness-images/stylegan_sharpness_lines.png}
-          \ \
-          \includegraphics[scale=0.25]{sharpness-images/coco_sharpness_lines.png}
-          \caption{\textbf{StyleGAN vs COCO-GAN sharpness visualizations.} We can see that the sharpness of StyleGAN comes from effectively generating complex patterns while the sharpness of CocoGAN comes from unwanted noise and messy patterns. Therefore, the qualitative analysis indicates that the quality of CocoGAN images is lower than sharpness numbers indicate.}
-        \end{figure} 
-        %
-        %
-        \subsection{C2ST smoothgrad analysis}
-        We can use SmoothGrad to generate a sensitivity map to visually discover which parts of the image most strongly affects the classification \cite{smoothgrad}.
-        Smoothgrad was performed on all 3 classifier models outlined in the C2ST section from earlier. 
-        Let $\mathbf{x} \in [0, 1]^{3 \times 256 \times 256}$ be the input image, $\mathcal{L}$ be CE loss, and $\nabla_{\mathbf{x}}^{*} \mathcal{L} (\mathbf{x})$ be the sensitivity map. $\nabla_{\mathbf{x}}^{*} \mathcal{L} (\mathbf{x}) = \frac{1}{100} \sum_{i=1}^{100} \nabla_{\mathbf{x}} \mathcal{L} (\mathbf{x} + \mathcal{N}(0, 0.1^2\mathbf{I}))$. 
-        Additional sensitivity map samples are available in the appendix.
+         \section{Latent space interpolation}
+         An important part of the generator is it's ability to combine different features from the real image in order to generate new images.
+        For example, in our dataset, an image could contain a bed, a window or a painting. What about a combination of these?
+        What if the locations of these features is changed? We use latent space interpolation to determine if the model produces robust images in all of these cases. Sample images used in this analysis are provided in the appendix.
         
-        \begin{figure}[H]
-          \centering
-          1
-          \includegraphics[scale=0.25]{smoothgrad/combined/real.png}
-          2
-          \includegraphics[scale=0.25]{smoothgrad/combined/stylegan.png}
-          3
-          \includegraphics[scale=0.25]{smoothgrad/combined/coco.png}
-          \caption{\textbf{Real vs GAN classifier sensitivity map. (1: real, 2: StyleGAN, 3: COCO-GAN)} Evidently, there is a clear checkerboard pattern, which could be caused by COCO-GAN's tile generation\cite{cocogan}. 
-        We can use the classifier trained on only one GAN to validate this theory.\\}
-            1
-            \includegraphics[scale=0.25]{smoothgrad/stylegan/real.png}
-            2
-            \includegraphics[scale=0.25]{smoothgrad/stylegan/stylegan.png}
-            3
-            \includegraphics[scale=0.25]{smoothgrad/coco/real.png}
-            4
-            \includegraphics[scale=0.25]{smoothgrad/coco/coco.png}
-          \caption{\textbf{Real vs StyleGAN $\{1, 2\}$ \& Real vs COCO-GAN $\{3, 4\}$ classifier sensitivity map.} $\{1, 3\}$ are real images, and $\{2, 4\}$ are from StyleGAN and COCO-GAN respectively. As seen in images $\{3, 4\}$, the Real vs COCO-GAN classifier uses a checkerboard filter, which is quite effective with a test accuracy of $\frac{76.1\% + 96.4\%}{2} = 86.3\%$ (Table 3). 
-          On the other hand, the StyleGAN classifier (images $\{1, 2\}$) is very uniform and shows very few artifacts.
-        This seems to suggest there are irregularities in between tiles generated by COCO-GAN which are easily detected by the classifier.
-        Therefore according to C2ST, StyleGAN produces more realistic images than COCO-GAN.}
-        \end{figure}
+         As we can see, both models do a good job of interpolating between different parts of the image. Specifically, both models are able to robustly interpolate between different sizes, colors, orientations, and shapes of beds. The bed is the most important part of a bedroom picture, and this is evidence that both models have a good understanding of beds. Additionally, we can also see that the models are able to interpolate between features like doors and paintings. Overall, the robust latent space interpolation of both models shows that they have a good understanding of different image features.
         
+    
         \section{Conclusion}
-        In conclusion, ...
-        
+        Based on the quantitative and qualitative metrics, StyleGAN generates superior images compared to COCO-GAN.
+        This is a result of a multitude of reasons, including: less prominent artifacts, more detailed imagery, and greater sharpness.
+        Our analysis included visual qualitative analyses to support the quantitative metrics to reduce the effect unrelated biases on the results.
         
 \newpage
 \begin{thebibliography}{9}
@@ -385,6 +352,12 @@ urlcolor=cyan,
         \href{https://arxiv.org/pdf/1706.03825.pdf}{SmoothGrad: removing noise by adding noise}
 
     \end{thebibliography}
+    
+    \section{Contributions}
+    \textbf{Henry Tu:} Abstract, Introduction, C2ST, Smoothgrad, StyleGAN, Latent Space, Conclusion\\
+    \textbf{Seel Patel:} Abstract, Introduction, Image Sharpness, Color Distribution, COCO-GAN, Latent Space, Nearest Neighbours, Conclusion
+    
+    
     \newpage
     %
     %
@@ -392,22 +365,19 @@ urlcolor=cyan,
     %
     \section{Appendix}
     \subsection{Latent space interpolation}
-        An important part of the generator is it's ability to combine different features from the real image in order to generate new images.
-        For example, in our dataset, an image could contain a bed, a window or a painting. What about a combination of these?
-        What if the locations of these features is changed? We use latent space interpolation to determine if the model produces robust images in all of these cases.
+
     \begin{figure}[H]
           \centering
           \includegraphics[scale=0.145]{latent-space/coco_latent_ex.png}
           \includegraphics[scale=0.145]{latent-space/cocogan_latent_interesting.png}
-          \caption{CocoGAN interpolated images}
+          \caption{COCO-GAN interpolated images}
     \end{figure}
      \begin{figure}[H]
           \centering
           \includegraphics[scale=0.4]{latent-space/stylegan_latent_1.png}
           \includegraphics[scale=0.4]{latent-space/stylegan_latent_2.png}
           \caption{StyleGAN interpolated images}
-    \end{figure}
-        As we can see, both models do a good job of interpolating between different parts of the image. Specifically, both models are able to robustly interpolate between different sizes, colors, orientations, and shapes of beds. The bed is the most important part of a bedroom picture, and this is evidence that both models have a good understanding of beds. Additionally, we can also see that the models are able to interpolate between features like doors and paintings. Overall, the robust latent space interpolation of both models shows that the models have a good understanding of different image features. 
+    \end{figure} 
     \newpage
     \subsection{Color distribution frequency plots}
     %
@@ -428,7 +398,7 @@ urlcolor=cyan,
      \begin{figure}[H]
           \centering
           \includegraphics[scale=0.35]{color-distributions/cocogan_color_freq.png}\\
-          \caption{CocoGAN image color frequency distribution}
+          \caption{COCO-GAN image color frequency distribution}
     \end{figure}
     %
     \subsection{Nearest neighbour images}
@@ -437,7 +407,7 @@ urlcolor=cyan,
           \includegraphics[scale=0.5]{nearest-neighbour/coco_test_image.png}
           \ \ 
           \includegraphics[scale=0.3]{nearest-neighbour/coco_nearest_images.png}\\
-          \caption{CocoGAN test image vs nearest neighbours to test image}
+          \caption{COCO-GAN test image vs nearest neighbours to test image}
     \end{figure}
     \begin{figure}[H]
           \centering
@@ -454,7 +424,7 @@ urlcolor=cyan,
     \begin{figure}[H]
           \centering
           \includegraphics[scale=0.4]{color-images/coco_more_peak_images.png}
-          \caption{More CocoGAN images matching color (0.3, 0.6, 0.6)}
+          \caption{More COCO-GAN images matching color (0.3, 0.6, 0.6)}
     \end{figure}
        \begin{figure}[H]
           \centering
@@ -470,7 +440,7 @@ urlcolor=cyan,
           \includegraphics[scale=0.28]{sharpness-images/moresharpness_coco.png}
           \ \ 
           \includegraphics[scale=0.28]{sharpness-images/moresharpness_lines_coco.png}\\
-          \caption{CocoGAN sharpest images and sharpness visualization}
+          \caption{COCO-GAN sharpest images and sharpness visualization}
         \end{figure}
         \begin{figure}[H]
           \centering
