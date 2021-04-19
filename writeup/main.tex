@@ -291,7 +291,7 @@ urlcolor=cyan,
         \end{figure}
           \section{Nearest neighbours}
         \label{subsec:nearestneighbours}
-        A common problem within GANs is mode collapse.
+        A common problem within GANs is mode collapse \cite{modecollapse}.
         This occurs when the generator consistently outputs the same image for distinct latent vectors.
         In addition to this, we want to identify if the generator creates multiple images with identical structure or color scheme.
         To identify these issues, we randomly sampled generated images and visually compared them with the euclidean $k$ nearest neighbours from the images produced by the same model. This was done on a sample of 1024 images for each dataset.
@@ -350,6 +350,10 @@ urlcolor=cyan,
         \bibitem{smoothgrad}
         Daniel Smilko, Nikhil Thorat, Been Kim, Fernanda Viegas, Martin Wattenberg (2017)
         \href{https://arxiv.org/pdf/1706.03825.pdf}{SmoothGrad: removing noise by adding noise}
+        
+        \bibitem{modecollapse}
+        Google. (2020)
+        \href{https://developers.google.com/machine-learning/gan/problems}{Common GAN Problems}
 
     \end{thebibliography}
     
@@ -359,8 +363,8 @@ urlcolor=cyan,
     
     \section{Source Code}
     This repository contains the source code used to manipulate the data-sets and compile the results for our analysis: \href{https://github.com/henrytwo/CSC413-Final-Project}{https://github.com/henrytwo/CSC413-Final-Project}
-
-
+    
+    
     \newpage
     %
     %
